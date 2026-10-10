@@ -270,13 +270,15 @@ def part_B():
     assert mono, "沉降轨迹非单调"
     assert res < 1e-5, f"未收敛到驻点: {res}"
 
-    # 有界性: tanh 预测满足 |p_i| <= 1, 故 E >= 1/2 sum (|x_i|-1)^2, 与 lambda 无关
-    print("  有界性 (coercivity): 沿轨迹与随机大状态检查下界 E >= 1/2 sum(|x_i|-1)^2")
+    # 有界性: tanh 预测满足 |p_i| <= 1, 故 E >= 1/2 sum ((|x_i|-1)^+)^2, 与 lambda 无关
+    # 正部不可省: |x_i| < 1 且 p_i 接近 x_i 时右端为 0 而 |x_i|-1 < 0
+    print("  有界性 (coercivity): 随机大状态检查下界 E >= 1/2 sum((|x_i|-1)^+)^2")
     big = [rng.standard_normal() * 20 for _ in range(3)]
-    lb = 0.5 * sum((abs(v) - 1.0) ** 2 for v in big)
+    lb = 0.5 * sum(max(0.0, abs(v) - 1.0) ** 2 for v in big)
+    print(f"    随机状态 ||x||_inf = {max(abs(v) for v in big):.4f}")
     for lam in (0.0, 0.01):
         eb = evaluate(g, big, w, b, inputs, lam)["energy"]
-        print(f"    lambda={lam:<5} E(x_large)={eb:14.4f}  >= 1/2 sum(|x|-1)^2 = {lb:.4f} : {eb >= lb}")
+        print(f"    lambda={lam:<5} E(x_large)={eb:14.4f}  >= 1/2 sum((|x|-1)^+)^2 = {lb:.4f} : {eb >= lb}")
         assert eb >= lb
     print("  → 能量强制 (coercive): 次水平集紧 ⇒ 迭代有界; 与活动先验无关")
     print("  活动先验的角色是选择驻点 (不是保证有界):")

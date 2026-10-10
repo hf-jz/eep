@@ -61,7 +61,7 @@ Run logs are archived in [`evidence/`](evidence).
 
 ```
 index.html      project page (static, single file)
-eep.pdf         the paper, 17 pages
+eep.pdf         the paper, 18 pages
 paper/eep.tex   LaTeX source, builds with xelatex
 src/            the two verification scripts
 evidence/       archived run logs
