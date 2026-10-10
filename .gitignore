@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# LaTeX build artifacts (eep.pdf is published from the repo root)
+*.aux
+*.out
+*.toc
+*.synctex.gz
+paper/*.log
+paper/*.pdf

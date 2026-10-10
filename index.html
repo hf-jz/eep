@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evolutionary Equilibrium Propagation: Settling to a Stable Equilibrium as the Single Primitive of Continual Learning</title>
+<meta name="description" content="One operator settles the network, answers the query and changes the connections. The repair descends a coercive real-analytic energy, so it converges to a single stationary point, and the centred learning contrast is second order.">
+<link rel="canonical" href="https://hf-jz.github.io/eep/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Settling to a stable equilibrium as the single primitive of continual learning">
+<meta property="og:description" content="There is no training phase. A patch net always repairs toward a stable equilibrium, and the same repair is forward pass, learning rule and error backpropagation at once.">
+<meta property="og:url" content="https://hf-jz.github.io/eep/">
+<meta property="og:image" content="https://hf-jz.github.io/eep/assets/page1.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="author" content="Sheng Cheng">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d4e89'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme:light dark;
+  --bg:#f4f4f2;--panel:#fdfdfc;--ink:#15171b;--muted:#575c65;--line:#dcdcd6;
+  --accent:#1d4e89;--accent-ink:#fff;--soft:#e9eef4;
+  --shadow:0 16px 36px rgba(21,23,27,.10);
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:6px;--maxw:1080px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0f1114;--panel:#16191d;--ink:#eceef1;--muted:#9aa1ab;--line:#282d34;--accent:#8fb4e3;--accent-ink:#0f1114;--soft:#17212c;--shadow:0 18px 40px rgba(0,0,0,.5)}
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;text-decoration-color:var(--line)}
+a:hover{text-decoration-color:var(--accent)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+section{padding:64px 0;border-top:1px solid var(--line);scroll-margin-top:72px}
+html{scroll-behavior:smooth}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+h1,h2,h3{margin:0;line-height:1.12;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3vw,1.95rem);font-weight:640}
+h3{font-size:1.05rem;font-weight:640;letter-spacing:-.01em}
+p{margin:14px 0 0;max-width:66ch;color:var(--ink)}
+.lead{color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;max-width:none}
+.grade{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--accent);border:1px solid var(--line);border-radius:var(--r);padding:3px 8px;white-space:nowrap}
+
+header.nav{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;height:62px;padding:0 24px;display:flex;align-items:center;gap:20px}
+.brand{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-links{margin-left:auto;display:none;gap:22px;font-size:14px}
+.nav-links a{color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--ink)}
+@media (min-width:820px){.nav-links{display:flex}}
+
+.btn{display:inline-block;font-size:14.5px;font-weight:560;padding:10px 18px;border-radius:var(--r);border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--panel)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+
+.hero{max-width:var(--maxw);margin:0 auto;padding:48px 24px 52px;display:grid;gap:40px}
+@media (min-width:900px){.hero{grid-template-columns:1.35fr .65fr;align-items:center;padding-top:56px;gap:40px}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;max-width:none}
+.hero h1{font-size:clamp(1.7rem,3.6vw,2rem);margin-top:14px;font-weight:660}
+.hero .sub{margin-top:18px;max-width:50ch;font-family:var(--serif);font-size:1.14rem;line-height:1.55;color:var(--muted)}
+figure{margin:0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);background:#fff}
+
+.result{background:var(--soft);border-top:1px solid var(--line)}
+.formula{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,4vw,2.2rem);text-align:center;margin:26px 0 0;letter-spacing:.01em;max-width:none}
+.formula .eq{font-style:normal}
+.fig-note{text-align:center;margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.03em;max-width:none}
+.two{display:grid;gap:36px;margin-top:34px}
+@media (min-width:820px){.two{grid-template-columns:1fr 1fr;gap:56px}}
+dl{margin:18px 0 0}
+dt{margin-top:18px;font-weight:600}
+dt:first-child{margin-top:0}
+dd{margin:4px 0 0;color:var(--muted);font-size:15.5px;max-width:52ch}
+.sym{font-family:var(--mono);font-size:13px;color:var(--accent);margin-right:6px}
+
+.titems{margin-top:8px}
+.titem{display:grid;gap:8px;padding:26px 0 26px 20px;border-left:2px solid var(--line)}
+.titem+.titem{margin-top:4px}
+.titem:hover{border-left-color:var(--accent)}
+.titem h3{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.titem p{margin:0;max-width:74ch}
+.tmeta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
+@media (min-width:820px){.titem{grid-template-columns:1fr 300px}.titem>div:first-child{margin-right:24px}}
+
+.strip{display:grid;gap:28px;margin-top:34px}
+@media (min-width:760px){.strip{grid-template-columns:repeat(3,1fr);gap:24px}}
+.strip figcaption{margin-top:12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+
+.rows{margin-top:30px}
+.row{display:grid;gap:6px;padding:22px 0}
+.row+.row{border-top:1px solid var(--line)}
+@media (min-width:820px){.row{grid-template-columns:290px 1fr;gap:36px;align-items:start}.row+.row{border-top:1px solid var(--line)}}
+.row .src{font-size:15px;font-weight:620}
+.row .src span{display:block;font-weight:400;font-size:13.5px;color:var(--muted);margin-top:3px}
+.row p{margin:0;font-size:15.5px;color:var(--muted)}
+
+.panels{display:grid;gap:24px;margin-top:34px}
+@media (min-width:820px){.panels{grid-template-columns:1fr 1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+.panel ul{margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:15.5px}
+.panel li{margin:8px 0}
+.relax{margin-top:34px;display:grid;gap:2px}
+.relax .r{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
+@media (min-width:820px){.relax .r{grid-template-columns:1fr 220px;gap:24px;align-items:baseline}}
+.relax .r span:last-child{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+.cols2{display:grid;gap:10px;margin-top:26px}
+@media (min-width:760px){.cols2{grid-template-columns:1fr 1fr;gap:14px 44px}}
+.cols2 div{padding:14px 0;border-top:1px solid var(--line)}
+.cols2 b{display:block;font-size:15px}
+.cols2 span{color:var(--muted);font-size:14.5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.6;margin:26px 0 0;color:var(--ink)}
+table{border-collapse:collapse;margin-top:26px;font-size:14.5px;width:100%;max-width:640px}
+caption{caption-side:bottom;text-align:left;margin-top:12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+th,td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{border-bottom:1px solid var(--ink)}
+tfoot td{font-weight:600;border-bottom:none}
+ol.refs{margin:26px 0 0;padding-left:22px;color:var(--muted);font-size:15px}
+ol.refs li{margin:10px 0}
+.hl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+footer{padding:52px 0 72px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+footer .frow{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:12px}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ScholarlyArticle",
+"name":"Evolutionary Equilibrium Propagation: Settling to a Stable Equilibrium as the Single Primitive of Continual Learning",
+"author":{"@type":"Person","name":"Sheng Cheng","affiliation":"Hefei Jiuzhai Big Data Technology Co., Ltd."},
+"datePublished":"2026-10-10","inLanguage":"en","isAccessibleForFree":true,
+"url":"https://hf-jz.github.io/eep/",
+"encoding":{"@type":"MediaObject","contentUrl":"https://hf-jz.github.io/eep/eep.pdf","encodingFormat":"application/pdf"},
+"license":"https://github.com/hf-jz/eep"}
+</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <span class="brand">eep</span>
+    <nav class="nav-links">
+      <a href="#result">Result</a>
+      <a href="#operator">One operator</a>
+      <a href="#theorems">Theorems</a>
+      <a href="#exact">Examples</a>
+      <a href="#predictions">Predictions</a>
+      <a href="#scope">Scope</a>
+      <a href="#cite">Cite</a>
+      <a href="eep.pdf">PDF</a>
+    </nav>
+    <a class="btn" style="margin-left:auto" href="eep.pdf">Read the paper</a>
+  </div>
+</header>
+
+<main>
+
+<div class="hero">
+  <div>
+    <p class="eyebrow" style="margin:0">Evolutionary equilibrium propagation</p>
+    <h1>One operator settles the network, answers the query and changes the connections</h1>
+    <p class="sub">A patch net always repairs toward a stable equilibrium under one energy. The same repair is forward pass, learning rule and error backpropagation at once.</p>
+    <div class="cta">
+      <a class="btn primary" href="eep.pdf">Read the paper</a>
+      <a class="btn" href="https://github.com/hf-jz/eep">GitHub</a>
+    </div>
+  </div>
+  <figure>
+    <img src="assets/page1.jpg" width="935" height="1210" alt="First page of the paper: title, author, affiliation, and the abstract">
+  </figure>
+</div>
+
+<section class="result" id="result">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Theorem 3</p>
+    <h2 style="margin-top:10px">Every bounded repair trajectory reaches a single stationary point</h2>
+    <p class="formula">&Pi;( z &minus; &nabla;F(z) ) = z ,&nbsp;&nbsp; with &nbsp; &Vert;z<sup>(j)</sup> &minus; z<sup>&#9733;</sup>&Vert; &le; C (1+j)<sup>&minus;(1&minus;&#977)/(2&#977;&minus;1)</sup></p>
+    <p class="fig-note">projected stationarity, and the rate from the &#321;ojasiewicz exponent &#977;</p>
+    <div class="two">
+      <div>
+        <p style="margin-top:0">The repair energy of a patch net is coercive, because every patch predicts its own state and every prediction is a bounded function of that state. Sublevel sets are compact, so trajectories are bounded. The energy is real analytic, so the &#321;ojasiewicz inequality holds at every point, and a line-search descent method on such a function has iterates that converge to one point rather than wandering over a stationary set.</p>
+        <p class="lead">The exponent is in [1/2, 1). At 1/2 convergence is exponential. This is the precise sense in which the system always evolves toward a stable equilibrium, and it is what licenses reading the settled state as the answer to the current query.</p>
+      </div>
+      <div>
+        <p style="margin-top:0">Convergence is to <em>a</em> stationary point, not to the global minimum. A nonconvex energy has several, with different basins, and different sensory boundary data settle differently. The system is a family of equilibria indexed by inputs, clamps and parameters.</p>
+        <p class="lead">Measured on a three-patch graph with a feedback edge: the energy falls at every accepted sweep over 2001 sweeps, from 0.22303138 to 0.00396407, and the projected residual at the terminal state is 4.297e-13.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="operator">
+  <div class="wrap">
+    <h2>There is no training phase to draw a boundary around</h2>
+    <p class="lead">A query freezes the parameters and repairs the states. A learning solve clamps the supplied targets, makes the parameters eligible, and adds one anchored quadratic term. Same energy, same operator, same qualification test. What changes is which coordinates the operator is allowed to move.</p>
+    <div class="two">
+      <div>
+        <h3 style="margin-top:34px">The anchored objective</h3>
+        <dl>
+          <dt><span class="sym">Q</span>Query solve</dt>
+          <dd>Repairs free states on the patch energy, with parameters frozen. The settled state is the answer.</dd>
+          <dt><span class="sym">L</span>Learning solve</dt>
+          <dd>Clamps targets, makes weights and biases eligible, and adds (rho/2) times the squared distance to the parameters held before the experience.</dd>
+          <dt><span class="sym">A</span>The anchor has a proved role</dt>
+          <dd>The anchored objective has parameter Hessian at least (rho minus the local curvature), so the parameter block is strongly convex once rho exceeds that curvature. The update contracts.</dd>
+          <dt><span class="sym">C</span>The contrast</dt>
+          <dd>The learning rule compares the two settled phases at each synapse. That is equilibrium propagation, and it is local: two activities plus one broadcast scalar.</dd>
+        </dl>
+      </div>
+      <div>
+        <h3 style="margin-top:34px">What the operator does in practice</h3>
+        <p>The state block of the gradient is identical whether or not the parameters are eligible. The measured difference at a fixed point (x, theta) is exactly 0.0, as Theorem 5 requires, so the two solves are literally one map with two coordinate index sets.</p>
+        <p>A learning solve with a clamped target decreases its anchored objective monotonically from 0.50822925 to 0.03354746 with a terminal projected residual of 2.459e-15. Feeding six successive experiences through the same operator drives the free-phase cost of that target from 9.036e-3 to 2.649e-4, while the parameter displacement accumulates steadily.</p>
+        <p class="lead">Nothing is reset between experiences, and no separate answer head exists. The goal enters through exactly one door, the nudge of the second phase.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="theorems">
+  <div class="wrap">
+    <h2>What is proved, and under what condition it would fail</h2>
+    <p class="lead">Each row states the result and the measurement that would refute it. The paper carries the proofs in full.</p>
+    <div class="titems">
+      <div class="titem">
+        <div>
+          <h3>Lyapunov descent <span class="grade">proved</span></h3>
+          <p>Every accepted step of the projected repair decreases the energy, with strict decrease away from a stationary point, so the sum of squared displacements is finite.</p>
+        </div>
+        <div><p class="tmeta">Falsified by an accepted step that raises the energy, or by a trajectory whose decrease does not sum.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>Coercivity, with or without the activity prior <span class="grade">proved</span></h3>
+          <p>F is at least one half of the sum of (|x| minus 1) squared, because each prediction is a tanh value. Boundedness follows from the architecture, not from the prior.</p>
+        </div>
+        <div><p class="tmeta">Checked at a random state with norm near 20: E is 209.1931 against a bound of 205.0945, and the bound holds identically at prior zero.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>Convergence to one point <span class="grade">proved</span></h3>
+          <p>Real analyticity gives the &#321;ojasiewicz inequality; a line-search descent method on an analytic cost function with bounded iterates converges to a single stationary point, at a polynomial or exponential rate.</p>
+        </div>
+        <div><p class="tmeta">Falsified by a bounded trajectory that visits two distinct stationary points, or by a residual that does not fall.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>One operator, two coordinate blocks <span class="grade">proved</span></h3>
+          <p>The anchor term has no state derivative, so the state gradient is unchanged by making parameters eligible. Eligibility enters only through projection and qualification.</p>
+        </div>
+        <div><p class="tmeta">Measured state-gradient difference between a query and a learning solve at a fixed point: exactly 0.0.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>Equilibrium propagation, fundamental lemma <span class="grade">proved here and in the source</span></h3>
+          <p>The one-sided contrast between the nudged and free phases equals the gradient of the free-phase loss up to O(beta), by the implicit function theorem on the equilibrium branch.</p>
+        </div>
+        <div><p class="tmeta">Falsified by a contrast whose direction disagrees with the exact gradient as beta falls.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>The centred contrast is second order <span class="grade">proved</span></h3>
+          <p>Contrasting a plus beta and a minus beta nudge from the same free state cancels the first-order term. The error is O(beta squared) rather than O(beta), at the cost of one extra settling phase.</p>
+        </div>
+        <div><p class="tmeta">Fitted orders on a three-patch graph: 1.00 for one-sided, 1.94 for centred. Falsified by a first-order centred error.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>Averaging to the Baldwinian fitness <span class="grade">proved under stated hypotheses</span></h3>
+          <p>Evolution acts on meta-parameters. As the lifetime-to-generation ratio vanishes, the population flows to a replicator-mutator equation whose fitness is the post-learning fitness, not the innate one.</p>
+        </div>
+        <div><p class="tmeta">Individual-based simulation with 4000 individuals reaches mean 0.4262 against the mean-field prediction 0.4001, with a residual spread of 0.1402.</p></div>
+      </div>
+      <div class="titem">
+        <div>
+          <h3>Biological compliance, with a necessary restriction <span class="grade">proved</span></h3>
+          <p>Blind variation, post hoc causal selection, an anchor weight above curvature, non-negative dissipation, scale separation and redundancy are satisfied by construction. Inheriting only the plasticity, and not the learned weights, is necessary on broad or rapidly changing task distributions.</p>
+        </div>
+        <div><p class="tmeta">Falsified if the two inheritance regimes do not cross over as the task distribution narrows.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="exact">
+  <div class="wrap">
+    <h2>An exactly solvable case, and agreement with the implementation</h2>
+    <p class="lead">Take one patch reading one sensory value with the activity prior switched off and a squared cost. Both contrasts are exact in closed form.</p>
+    <p class="formula" style="font-size:clamp(1.25rem,3.2vw,1.7rem)">D<sub>one</sub> = (&part;L/&part;w) &middot; (1+&beta;)<sup>&minus;1</sup> &nbsp;&nbsp;&nbsp; D<sub>ctr</sub> = (&part;L/&part;w) &middot; (1&minus;&beta;<sup>2</sup>)<sup>&minus;1</sup></p>
+    <p class="fig-note">the centred error is the square of the one-sided error to leading order</p>
+    <table>
+      <caption>Contrast error against the exact gradient of the free-phase loss, on a three-patch graph with a feedback edge. Halving beta halves the one-sided error and quarters the centred error.</caption>
+      <thead><tr><th>beta</th><th>one-sided error</th><th>centred error</th></tr></thead>
+      <tbody>
+        <tr><td>4.00e-2</td><td>7.968e-2</td><td>5.125e-3</td></tr>
+        <tr><td>2.00e-2</td><td>4.096e-2</td><td>1.283e-3</td></tr>
+        <tr><td>1.00e-2</td><td>2.076e-2</td><td>3.214e-4</td></tr>
+        <tr><td>5.00e-3</td><td>1.045e-2</td><td>8.111e-5</td></tr>
+        <tr><td>2.50e-3</td><td>5.245e-3</td><td>2.116e-5</td></tr>
+      </tbody>
+      <tfoot><tr><td>fitted order</td><td>1.00</td><td>1.94</td></tr></tfoot>
+    </table>
+    <div class="two">
+      <div>
+        <p style="margin-top:0">The closed-form case is checked numerically at four values of beta and agrees to 4.7e-11. The centred column in the table above matches the analytic expression to the same tolerance.</p>
+        <p class="lead">The exact gradient used as the reference is obtained by central differences of the settled free state, which is the implicit-function-theorem gradient and not an approximation to it.</p>
+      </div>
+      <div>
+        <p style="margin-top:0">The paper's own implementation of the patch law is compared against the reference library at version 0.80.0 on the same graph. The largest absolute difference across the energy, the prediction, the error, and the state, weight and bias gradients is 1.1e-16, which is float64 rounding. Terminal states agree to 1.018e-12.</p>
+        <p class="lead">A settlement through the library's public composition interface qualifies with a stationarity residual of 2.8e-7 after seven accepted sweeps. The mathematics describes the implementation that exists.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evolution">
+  <div class="wrap">
+    <h2>The second time scale</h2>
+    <p class="lead">Evolution changes the meta-parameters between lives. A life changes the weights. The object that selection sees is the fitness after a life of learning.</p>
+    <div class="two">
+      <div>
+        <h3 style="margin-top:34px">What is inherited</h3>
+        <p>The wiring mask, the form of the energy, and the plasticity constants. Not the weights learned within a life. This is the Weismann restriction written as a design constraint rather than borrowed as a metaphor.</p>
+        <p class="lead">In the notation of the paper, the restricted system transmits only the capacity to learn, so its population keeps the ability to specialise within each life.</p>
+      </div>
+      <div>
+        <h3 style="margin-top:34px">What the measurements show</h3>
+        <p>With a scalar plasticity meta-parameter, the post-learning fitness has an interior maximum at 0.3913, which is the statement that learning is retained. A value of zero would mean the lineage switched plasticity off.</p>
+        <p class="lead">The population free energy falls monotonically from 0.379150 to 0.109856 and approaches the Gibbs form to a total-variation distance of 0.0040.</p>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <div class="src">Price-type decomposition<span>Proposition 9</span></div>
+        <p>The per-generation change of mean fitness separates into innate selection, plasticity selection, Baldwin accommodation and mutation. At a stationary population both covariance terms vanish.</p>
+      </div>
+      <div class="row">
+        <div class="src">Free-energy dissipation<span>Theorem 10</span></div>
+        <p>The population flow is a Wasserstein gradient flow, so it dissipates one free energy monotonically and settles at the Gibbs form. The four layers carry a nested Lyapunov family, one per time scale.</p>
+      </div>
+      <div class="row">
+        <div class="src">Energy accounting<span>remark</span></div>
+        <p>The dissipation identity is structural, not a claim about joules. Quasi-static analog inference can in principle be reversible, while training carries a floor linear in dataset size and parameter count. The advantage reported in thermodynamic computing is at inference, not in training.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Inside the document</h2>
+    <div class="strip">
+      <figure>
+        <img loading="lazy" src="assets/page1.jpg" width="935" height="1210" alt="Title page: the full title, author, affiliation, the English abstract and the Chinese abstract">
+        <figcaption>Title page. The claim, the three results from one operator, and the scope sentence carried through to the abstract.</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="assets/page2.jpg" width="680" height="880" alt="Page two: the Chinese abstract and the table of contents">
+        <figcaption>Chinese abstract and contents. Ten theorems, four worked examples, and the reproduction appendix.</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="assets/page16.jpg" width="680" height="880" alt="A results page showing the contrast-error table and the section on the order of the contrast">
+        <figcaption>A results page. The contrast-error table with fitted orders, the coercion check, and the section on one operator and learning that converges.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="predictions">
+  <div class="wrap">
+    <h2>Four ways to refute this</h2>
+    <p class="lead">A construction that cannot fail is not a contribution. These are stated so that they can.</p>
+    <div class="rows">
+      <div class="row">
+        <div class="src">Order of the centred contrast<span>Theorem 7</span></div>
+        <p>Any patch net whose second phase is an equilibrium branch of a twice-differentiable family should show a centred error scaling as beta squared. A measured first-order centred error refutes the theorem.</p>
+      </div>
+      <div class="row">
+        <div class="src">Anchor weight above curvature<span>Theorem 4</span></div>
+        <p>Setting the anchor weight above the local curvature of the data term should remove the oscillatory or divergent parameter trajectories seen at small anchor weights, and the improvement should track the contraction factor.</p>
+      </div>
+      <div class="row">
+        <div class="src">Averaging order<span>Theorem 8</span></div>
+        <p>Doubling the lifetime-to-generation ratio should halve the deviation between an individual-based population and the averaged flow. An exponent away from one refutes the hypotheses of the averaging theorem.</p>
+      </div>
+      <div class="row">
+        <div class="src">Weismann boundary<span>Theorem 11</span></div>
+        <p>On a broad or rapidly changing task distribution the population inheriting only plasticity should reach strictly higher stationary fitness, and on a narrow stable distribution the ordering should reverse.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="scope">
+  <div class="wrap">
+    <h2>Claimed, and not claimed</h2>
+    <div class="panels">
+      <div class="panel">
+        <h3>Claimed</h3>
+        <ul>
+          <li>Settling on the patch energy converges to a single stationary point, with a rate given by the &#321;ojasiewicz exponent.</li>
+          <li>Inference and learning are one operator restricted to different coordinate blocks.</li>
+          <li>The learning contrast is equilibrium propagation, and its centred form is second order.</li>
+          <li>The evolutionary layer satisfies six formal criteria of biological evolution, and the inheritance restriction is necessary on stated distributions.</li>
+          <li>The implementation matches the mathematics to float64 rounding.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Not claimed</h3>
+        <ul>
+          <li>That settling yields intelligence, or that a patch net matches a transformer at any task.</li>
+          <li>That the architecture scales. Every result here is on graphs of a few patches.</li>
+          <li>That uniform hyperbolicity of the lifetime flow holds as meta-parameters vary. That is the weakest link and it is stated as a hypothesis.</li>
+          <li>That the evolutionary layer has been validated on hardware. The evidence is numerical.</li>
+          <li>That this saves energy while learning.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="relax">
+      <div class="r"><span>Combinatorial meta-parameters make the fitness non-differentiable in the wiring mask, so the averaging theorem needs a stochastic approximation form.</span><span>open</span></div>
+      <div class="r"><span>Estimator noise inside the fitness couples selection to estimation error across generations, and the covariance terms no longer vanish.</span><span>open</span></div>
+      <div class="r"><span>Offline consolidation at an intermediate time scale is described as a constrained information projection but is not yet inside the unified averaging.</span><span>open</span></div>
+      <div class="r"><span>The units are rate units with a smooth prediction function, not spiking neurons, and the body model is simplified.</span><span>scoped</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="reproduce">
+  <div class="wrap">
+    <h2>Reproduce every number on this page</h2>
+    <p class="lead">Two scripts. The first is numpy only and asserts each claim, exiting non-zero if a claim fails. The second imports the reference library and performs the cross-check.</p>
+    <pre>python3 src/verify_eep.py
+# Parts A-F: analytic gradients against finite differences (1.5e-10)
+#            settling monotonicity, convergence, coercivity
+#            order of the one-sided and centred contrasts
+#            one operator across two coordinate blocks
+#            the evolutionary layer
+#            the closed-form case
+
+PYTHONPATH=../cadence/src python3.13 src/cadence_crosscheck.py
+# energy, prediction, error and all three gradients against cadence-net 0.80.0
+# largest absolute difference 1.110e-16</pre>
+    <p class="lead" style="margin-top:18px">Run logs are archived beside the scripts in <code>evidence/</code>. The paper source is <code>eep.tex</code> and builds with xelatex.</p>
+  </div>
+</section>
+
+<section id="cite">
+  <div class="wrap">
+    <h2>Cite</h2>
+    <pre>@article{cheng2026eep,
+  title  = {Evolutionary Equilibrium Propagation: Settling to a Stable
+            Equilibrium as the Single Primitive of Continual Learning},
+  author = {Cheng, Sheng},
+  year   = {2026},
+  month  = {October},
+  note   = {Hefei Jiuzhai Big Data Technology Co., Ltd.},
+  url    = {https://hf-jz.github.io/eep/}
+}</pre>
+    <h3 style="margin-top:38px">Selected references</h3>
+    <ol class="refs">
+      <li>B. Scellier and Y. Bengio. Equilibrium propagation: bridging the gap between energy-based models and backpropagation. Frontiers in Computational Neuroscience 11:24, 2017.</li>
+      <li>B. Scellier and Y. Bengio. Equivalence of equilibrium propagation and recurrent backpropagation. 2019.</li>
+      <li>M. Ernoult, J. Grollier, D. Querlioz, Y. Bengio and B. Scellier. Updates of equilibrium prop match gradients of backprop through time in an RNN with static input. NeurIPS, 2019.</li>
+      <li>A. Laborieux and F. Zenke. Holomorphic equilibrium propagation computes exact gradients through finite size oscillations. NeurIPS, 2022.</li>
+      <li>P.-A. Absil, R. Mahony and B. Andrews. Convergence of the iterates of descent methods for analytic cost functions. SIAM Journal on Optimization 16(2):531-547, 2006.</li>
+      <li>J. Bolte, A. Daniilidis, A. Lewis and M. Shiota. Clarke subgradients of stratifiable functions. SIAM Journal on Optimization 18(2):556-572, 2007.</li>
+      <li>W. Gerstner, M. Lehmann, V. Liakoni, D. Corneil and J. Brea. Eligibility traces and plasticity on behavioral time scales. Frontiers in Neural Circuits 12:53, 2018.</li>
+      <li>C. Fernando, J. Syrota and J. E. Pompeu. Meta-learning by the Baldwin effect. GECCO Companion, 2018.</li>
+      <li>B. Mueller. Cadence: one continuing equilibrium brain, version 0.80.0, 2026.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0;max-width:66ch">Sheng Cheng, Hefei Jiuzhai Big Data Technology Co., Ltd. The patch law formalised here is the settling rule of the Cadence library by Bernhard Mueller and Pragma Research, which is the implementation the cross-check runs against. This work is an independent extension and is not affiliated with that project.</p>
+    <div class="frow">
+      <a href="eep.pdf">Paper (PDF)</a>
+      <a href="https://github.com/hf-jz/eep/blob/main/paper/eep.tex">LaTeX source</a>
+      <a href="https://github.com/hf-jz/eep">Repository</a>
+      <a href="https://github.com/muellerberndt/cadence">Cadence</a>
+      <span>October 2026</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

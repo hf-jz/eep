@@ -1,0 +1,926 @@
+\documentclass[11pt]{article}
+\usepackage[UTF8,fontset=macnew]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage[colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Hypothesis}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{criterion}[theorem]{Criterion}
+
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\KL}{KL}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cF}{\mathfrak{F}}
+\newcommand{\cL}{\mathfrak{L}}
+\newcommand{\Proj}{\Pi}
+
+\title{\bfseries Evolutionary Equilibrium Propagation:\\[2pt]
+Settling to a Stable Equilibrium as the Single Primitive of Continual Learning}
+\author{Sheng Cheng\\ \small Hefei Jiuzhai Big Data Technology Co., Ltd.\\ \small \texttt{github.com/hf-jz}}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+A deployed neural network today stops learning before it ships: its parameters are frozen at the end of
+a training phase, and inference is a different kind of computation from training. Biological nervous
+systems have no such boundary. We take the position that the boundary is not a fact about learning but
+a fact about \emph{one} design choice, the choice to separate a forward computation from a backward one,
+and we ask how far a system can go whose only primitive is \textbf{settling to a stable equilibrium}.
+
+We formalise such a system as a \emph{patch net}: each unit holds local state and predicts it from its
+neighbours, the network repairs disagreement by projected gradient descent on one energy, and the
+settled state is the answer. Three results follow from the same operator. (i) The repair descends a
+coercive real-analytic energy, so its iterates are bounded and converge to a single stationary point,
+which is the precise sense in which the system \emph{always evolves toward a stable equilibrium}.
+(ii) Inference and learning are the same repair restricted to different coordinate blocks, and the
+learning block carries an anchored (proximal) term that makes it uniformly well posed, so there is no
+train/inference distinction to draw. (iii) The learning contrast is equilibrium propagation in the sense
+of Scellier and Bengio, and we prove that the one-sided contrast has error $O(\beta)$ while the
+\emph{centred} contrast used by current implementations has error $O(\beta^2)$, with an exactly
+solvable example giving both constants in closed form.
+
+We then lift the structure to a second time scale. Evolution acts on the \emph{meta-parameters} that
+define how the system settles and learns (the wiring mask, the energy's form, the plasticity constants),
+never on the weights learned within a life. We prove a two-timescale averaging theorem whose effective
+fitness is the post-learning (Baldwinian) fitness, a Price-type decomposition that separates innate
+selection from the plasticity channel, and a free-energy dissipation identity for the population. The
+construction is checked against the six formal criteria of biological evolution; the inheritance
+restriction is shown to be necessary by a counterexample that is not merely biological but adaptive.
+Every quantitative claim is reproduced by two scripts, one of which agrees with the reference
+implementation to $1.1\times10^{-16}$ in float64.
+
+\medskip
+\noindent\textbf{摘要.}\; 本文把“神经系统始终朝稳定的均衡演化”作为持续学习的唯一原语：网络通过在一个能量函数上的投影梯度修复达到稳定均衡，推理与学习是同一算子作用于不同坐标块，因此不存在训练/推理之分。我们证明该修复过程在强制（coercive）实解析能量上单调下降并收敛到单个驻点；证明学习对比即 Scellier 与 Bengio 的均衡传播（EP），并证明单边对比误差为 $O(\beta)$、而当前实现所用的中心对比误差为 $O(\beta^2)$，且给出可解实例的闭式常数。随后把结构提升到第二时间尺度：进化作用于元参数（连接掩码、能量形式、可塑性常数），不作用于一生所学的权重；我们证明双时间尺度平均化定理（有效适应度为后学习适应度）、Price 型分解与族群自由能耗散恒等式，并按生物进化的六条形式判据逐条检验。全部定量结论由两个脚本复现，其中与参考实现的最大偏差为 $1.1\times10^{-16}$。
+
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+\subsection{The frozen-weight problem}
+A contemporary language model is trained once, at great expense, and then used with its parameters
+fixed. Online and continual variants exist, and recurrent networks can in principle keep adapting, but
+the dominant deployed regime separates a training phase from a use phase and computes gradients by
+backpropagation through a stored forward pass. The separation has three consequences that are easy to
+state and hard to remove. The system cannot learn from an outcome it has just witnessed unless a
+training procedure is invoked. It cannot retain a correction across sessions unless the correction is
+written back into the parameters. And the correction requires a backward pass, which is not a
+computation any known biological circuit performs.
+
+Biological nervous systems do none of this. A nematode with $302$ neurons and no capacity for a
+backward pass navigates, learns odours, and keeps learning while it acts. The question this paper takes
+seriously is what a learning system looks like when the forward/backward split is removed rather than
+optimised.
+
+\subsection{The settling hypothesis}
+The hypothesis we formalise is that the single primitive is \emph{settling}. A network of units, each
+holding local state and predicting it from its neighbours, repairs disagreement until the whole
+network is at rest. The resting state is the answer. Learning is the same repair with the parameters
+made eligible, so the same operator that answers a query also changes the connections, and no separate
+answer head or backward circuit exists.
+
+This is the design of \emph{Cadence}~\cite{cadence,manuscript}, an open research library whose
+settling rule is equilibrium propagation~\cite{scellier2017}. We do not propose a new library. We
+supply what the design has been missing: a proof that settling \emph{always} reaches a stable
+equilibrium under stated conditions, a proof that inference and learning are literally one operator,
+a second-order account of the contrast the implementation uses, and a mathematically stated
+evolutionary layer with its compliance conditions.
+
+\subsection{Contributions}
+\begin{enumerate}
+\item \textbf{The settling primitive is proved to converge} (\S\ref{sec:settling}). The repair energy of
+a patch net with $\tanh$ predictions is coercive with or without an activity prior, because each state
+enters its own prediction error and each prediction is bounded. The energy is real analytic, so the
+Łojasiewicz inequality holds at every point, and a line-search descent method on such a function has
+bounded iterates that converge to a single stationary point, not merely a stationary limit set.
+\item \textbf{Inference and learning are one operator} (\S\ref{sec:oneop}). The learning objective
+differs from the query objective by an anchored quadratic term and by which coordinate blocks are
+eligible. We prove the anchored objective's parameter block is uniformly strongly convex once the
+anchor weight exceeds the local curvature of the data term, which is what makes continual online
+updating stable rather than merely possible.
+\item \textbf{The contrast is second order} (\S\ref{sec:centred}). We prove the one-sided contrast has
+error $O(\beta)$ and the centred contrast, which contrasts a $+\beta$ and a $-\beta$ nudge from the
+same free state, has error $O(\beta^2)$. An exactly solvable scalar instantiation gives both constants
+in closed form as $\partial L/\partial w \cdot (1+\beta)^{-1}$ and
+$\partial L/\partial w \cdot (1-\beta^2)^{-1}$.
+\item \textbf{An evolutionary layer with an averaging theorem} (\S\ref{sec:evo}). Evolution acts on
+meta-parameters. The effective fitness of a meta-parameter is the fitness after a lifetime of EP
+learning, which is the Baldwinian post-learning fitness. We prove the population dynamics average to a
+replicator-mutator flow with that fitness, give a Price-type decomposition, and give a free-energy
+dissipation identity.
+\item \textbf{Biological compliance as a theorem, not a claim} (\S\ref{sec:bio}). Six formal criteria
+of biological evolution are stated, the construction is proved to satisfy them, and the Weismann
+restriction is proved necessary by a distribution of tasks on which dropping it is strictly worse.
+\item \textbf{Reproducibility} (\S\ref{sec:examples}). Four worked examples, including an exact
+closed-form case and a cross-check against the reference implementation that agrees to
+$1.1\times10^{-16}$.
+\end{enumerate}
+
+\subsection{Scope}
+The paper proves statements about the settling dynamics and the optimisation they define. It does not
+claim that settling yields intelligence, that a patch net matches a transformer at any task, or that
+the evolutionary layer has been validated on hardware. \S\ref{sec:limits} states the open problems and
+four falsifiable predictions. The empirical results reported here are numerical, on small graphs, and
+they are evidence about the mathematics, not about capability.
+
+\section{The settling primitive}
+\label{sec:settling}
+
+\subsection{The processing patch}
+Let the network be a finite directed graph with $m$ sensory coordinates, $n$ patches, and an edge set
+$E$ whose elements are triples $(k,s,t)$ with $k\in\{\text{input},\text{state},\text{residual}\}$.
+Patch $i$ holds a live state $x_i\in[-B,B]$ and retained parameters: a weight $w_e$ per incoming edge
+and a bias $b_i$. Write $s_e$ for the signal on edge $e$: a fixed sensory sample for $k=\text{input}$,
+a live state $x_s$ for $k=\text{state}$, and a prediction error $e_s=x_s-p_s$ for
+$k=\text{residual}$. The patch law is
+\begin{equation}
+p_i=\tanh\!\Big(b_i+\sum_{e=(k,s,i)\in E} w_e\,s_e\Big),
+\qquad
+e_i=x_i-p_i,
+\label{eq:patch}
+\end{equation}
+and the settling energy is
+\begin{equation}
+E(x;\theta)=\tfrac12\sum_{i=1}^{n} e_i^{\,2}+\tfrac{\lambda}{2}\sum_{i=1}^{n} x_i^{\,2},
+\qquad \theta=(w,b),\quad \lambda\ge 0 .
+\label{eq:energy}
+\end{equation}
+Prediction and error are recomputed from state and parameters and are never independently writable,
+so they cannot conceal a disagreement. Residual edges must be acyclic, since they define derived
+quantities; state edges may be recurrent, which is what allows a later patch to influence an earlier
+one through the same energy. Sensory coordinates are boundary values, held fixed throughout a solve.
+
+Equation~\eqref{eq:energy} is the settling objective of the reference library~\cite{cadence}; the
+implementation reproduces its value and every analytic derivative to machine precision
+(Example~\ref{ex:crosscheck}). The activity prior with weight $\lambda$ is part of the model rather
+than a numerical setting, and \S\ref{sec:coercive} proves exactly which role it plays.
+
+\subsection{The repair operator}
+Write $z$ for the vector of eligible coordinates, which are the free states for a query solve and the
+free states together with the weights and biases for a learning solve. Let $\Proj$ project onto the
+declared box, let $g=\nabla_z F$ be the exact gradient of the current objective, and let $c=1/B$ be a
+bound on the movement. The repair operator $\mathcal{R}$ is projected gradient descent with
+backtracking:
+\begin{equation}
+z^{(j+1)}=\Proj\big(z^{(j)}-\alpha_j\,g^{(j)}\big),
+\qquad
+F\big(z^{(j+1)}\big)\;\le\;F\big(z^{(j)}\big)+10^{-4}\,\big\langle g^{(j)},\,z^{(j+1)}-z^{(j)}\big\rangle ,
+\label{eq:repair}
+\end{equation}
+with $\alpha_j$ proposed by a two-point secant (Barzilai-Borwein) estimate from the previous accepted
+displacement and gradient change, halved on rejection, and with the configured initial step as the
+fallback when the curvature estimate is not positive and finite. A solve qualifies when the projected
+stationarity residual
+\begin{equation}
+\rho(z)=\big\|\,\Proj(z-g)-z\,\big\|_\infty
+\label{eq:residual}
+\end{equation}
+is at most a declared tolerance over every eligible coordinate. Qualification is a statement about a
+constrained stationary point. It is not a statement about prediction error, uniqueness, or accuracy:
+a compromise with nonzero prediction errors can qualify, and a qualified point can be wrong about the
+world.
+
+\subsection{Descent}
+\begin{theorem}[Lyapunov descent]
+Let $F$ be $C^1$ on the box and suppose every candidate step of \eqref{eq:repair} is accepted only
+when the Armijo condition holds. Then
+$F(z^{(j)})$ is non-increasing, and if $g^{(j)}\neq 0$ the decrease is strictly negative. Consequently
+$F$ converges and $\sum_j \|z^{(j+1)}-z^{(j)}\|^2<\infty$.
+\end{theorem}
+\begin{proof}
+The Armijo condition with the descent direction $d^{(j)}=-g^{(j)}$ gives
+$\langle g^{(j)}, z^{(j+1)}-z^{(j)}\rangle<0$ whenever $g^{(j)}\neq0$, since
+$z^{(j+1)}-z^{(j)}$ agrees with $-g^{(j)}$ on coordinates that are not at an active bound and is zero
+on coordinates whose gradient pushes outward. The right side of the Armijo inequality is therefore
+strictly less than $F(z^{(j)})$. Monotonicity gives convergence of $F$ because $F$ is bounded below by
+$0$. Summing the sufficient-decrease inequality over $j$ and using that $F$ converges bounds the
+weighted sum of squared displacements, and boundedness of the gradient on the compact box upgrades
+this to the stated sum.
+\end{proof}
+
+\subsection{Coercivity and boundedness}
+\label{sec:coercive}
+\begin{theorem}[Coercivity]
+For every $x\in\R^n$ and every $\theta$, $F(x;\theta)\ge \tfrac12\sum_i(|x_i|-1)^2$, hence $F\to\infty$
+as $\|x\|\to\infty$. Sublevel sets of $F$ are compact, and every repair trajectory is bounded,
+independently of the activity prior.
+\end{theorem}
+\begin{proof}
+Each prediction is a $\tanh$ value, so $|p_i|\le1$. Dropping the nonnegative prior term and the
+remaining $n-1$ squared errors,
+$F\ge\tfrac12(x_i-p_i)^2\ge\tfrac12(|x_i|-|p_i|)^2\ge\tfrac12(|x_i|-1)^2$ for each $i$. Summing over
+$i$ gives the bound. A coercive continuous function on $\R^n$ has compact sublevel sets, and a
+sequence generated by Theorem~1 stays in the sublevel set of its starting value, so it is bounded.
+\end{proof}
+
+Two consequences deserve to be stated plainly, because the activity prior is often described as a
+numerical stabiliser and it is something else. First, boundedness does not depend on the prior: it
+follows from the architecture, because a patch always predicts its own state and the prediction is
+bounded. Second, the prior acts by selecting among stationary points. With $\lambda=0$ the zero-error
+configuration $x_i=p_i$ is stationary and attains $F=0$ when the equations are consistent, while with
+$\lambda>0$ the stationary point trades prediction error against activity and typically retains a
+nonzero residual. The numerical evidence is in \S\ref{ex:chain}.
+
+\subsection{Convergence to a single equilibrium}
+The hypothesis that the network \emph{always evolves toward a stable equilibrium} is stronger than
+monotone descent with a stationary limit set. It says the trajectory settles down. The mechanism is
+analyticity.
+
+\begin{theorem}[Convergence]
+\label{thm:convergence}
+Suppose $F$ is real analytic on its domain, the iterates of \eqref{eq:repair} are bounded, the step
+sizes are bounded away from $0$ along accepted steps in the sense required by the method's descent
+conditions, and the accumulated decrease is bounded. Then the iterates converge to a single stationary
+point $z^\star$ with $\rho(z^\star)=0$. Moreover there is an exponent
+$\vartheta\in[\tfrac12,1)$ and a constant $C>0$ such that
+$\|z^{(j)}-z^\star\|\le C\,(1+j)^{-(1-\vartheta)/(2\vartheta-1)}$ once $\vartheta>\tfrac12$, and
+convergence is exponential when $\vartheta=\tfrac12$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+A real-analytic function satisfies the Łojasiewicz gradient inequality at every point: near a critical
+point $z^\star$ there are $\vartheta\in[\tfrac12,1)$ and $C_0>0$ with
+$\|\grad F(z)\|\ge C_0\,|F(z)-F(z^\star)|^{\vartheta}$~\cite{lojasiewicz}. For constraint sets defined
+by finitely many analytic inequalities, which includes a box, the same inequality holds with the
+projected gradient by the Kurdyka-Łojasiewicz extension for functions definable in an o-minimal
+structure~\cite{bolte}. Absil, Mahony and Andrews show that a descent method satisfying natural
+descent conditions on an analytic cost function, including an Armijo line search, has bounded iterates
+whose accumulation points are stationary and, by the Łojasiewicz argument applied along the
+trajectory, converges to a single point~\cite{absil}. The rate follows by integrating the inequality
+along the trajectory: $\vartheta=\tfrac12$ gives exponential convergence and $\vartheta>\tfrac12$ gives
+the stated polynomial rate.
+\end{proof}
+
+\begin{remark}[What the theorem does not say]
+Convergence to \emph{a} stationary point is not convergence to the global minimum, and a nonconvex
+energy may have several stationary points with different basins. Different initial states, and
+different sensory boundary data, may settle differently. The system is a family of equilibria indexed
+by inputs, clamps and parameters, which is the intended semantics, and Theorem~\ref{thm:convergence} is
+what licenses reading the settled state as \emph{the} answer to the current query.
+\end{remark}
+
+\section{Inference and learning are the same operator}
+\label{sec:oneop}
+
+\subsection{The anchored objective}
+A learning solve fixes supplied output targets $y$ as clamps and makes the parameters eligible, adding
+a proximal anchor at the parameters held immediately before the experience:
+\begin{equation}
+F_{\text{learn}}(x,\theta)=\tfrac12\sum_i\big(x_i-p_i(\theta)\big)^2
++\tfrac{\lambda}{2}\|x\|^2
++\tfrac{\rho}{2}\,\|\theta-\theta_a\|^2 .
+\label{eq:anchored}
+\end{equation}
+The anchor $\theta_a$ is fixed for the whole solve and charged once. In a batch of $B$ labelled
+experiences, each row carries private state and the rows share one parameter vector and one anchor,
+\begin{equation}
+F_{\text{batch}}=\frac1B\sum_{b=1}^{B}E_b(x_b,\theta)+\frac{\rho}{2}\|\theta-\theta_a\|^2 ,
+\label{eq:batch}
+\end{equation}
+and qualification applies the projected stationarity test to each row's unaveraged state gradient and
+to the shared parameter gradient of the complete mean-plus-anchor objective, so that the tolerance does
+not depend on $B$.
+
+\subsection{Why the anchor matters}
+\begin{theorem}[Well-posedness of the parameter block]
+\label{thm:anchor}
+Fix a bounded box for $\theta$ and let $M=\sup_{\theta}\|\nabla_\theta^2 E\|$ where $E$ is the data
+part of \eqref{eq:anchored} on that box. Then
+$\nabla_\theta^2 F_{\text{learn}}\succeq(\rho-M)I$. In particular, if $\rho>M$ the parameter block is
+$\rho$-strongly convex and the projected parameter update contracts with factor
+$1-\rho/L_\theta$ for $L_\theta$ the Lipschitz constant of the parameter gradient.
+\end{theorem}
+\begin{proof}
+The Hessian of the anchor term is $\rho I$, and the Hessian of the data term is bounded below by
+$-MI$ on the box by definition of $M$. Summing gives the first claim. Strong convexity with modulus
+$\rho-M$ and $L_\theta$-Lipschitz gradient gives the standard contraction rate
+$1-(\rho-M)/L_\theta$ for projected gradient descent on the parameter block, and choosing $\rho>M$
+makes the rate strictly less than one.
+\end{proof}
+
+\begin{remark}
+Equation~\eqref{eq:anchored} is a maximum-a-posteriori objective with a Gaussian prior of precision
+$\rho$ at the pre-experience parameters. Theorem~\ref{thm:anchor} makes the prior's role exact: it is
+what bounds the influence of any single experience on the parameters, which is the property a
+continual learner needs and the property that a plain least-squares fit lacks. The design rule is to
+set the anchor weight above the local curvature of the data term.
+\end{remark}
+
+\subsection{One operator, two blocks}
+\begin{theorem}[No train/inference distinction]
+\label{thm:oneop}
+Let $\cX$ be the free state coordinates and $\Theta$ the parameter coordinates. Define
+$G(x,\theta)=\nabla_{(x,\theta)}F_{\text{learn}}$ and let $G_x$ be its state block. Then (i) $G_x$ does
+not depend on whether $\Theta$ is eligible, and equals the state gradient of the query objective
+$F_{\text{query}}=E$; (ii) the repair operator \eqref{eq:repair} applied to $\cX$ alone is the query
+solve, and applied to $\cX\cup\Theta$ is the learning solve; (iii) as $\rho\to\infty$ the learning
+solve converges to the query solve with the parameter block frozen.
+\end{theorem}
+\begin{proof}
+(i) The anchor term $\tfrac{\rho}{2}\|\theta-\theta_a\|^2$ has zero derivative with respect to $x$
+and adds only $\rho(\theta-\theta_a)$ to the parameter gradient, so the state block of
+$\nabla F_{\text{learn}}$ equals $\nabla_x E$ identically. (ii) Eligibility enters \eqref{eq:repair}
+only through which coordinates are projected and tested in \eqref{eq:residual}, so the two solves are
+one map with two coordinate index sets. (iii) Multiplying the parameter gradient by $1/\rho$ and
+letting $\rho\to\infty$ drives the parameter displacement to zero, and the state subproblem converges
+to the frozen-parameter problem on the same energy.
+\end{proof}
+
+Theorem~\ref{thm:oneop} is the formal content of the statement that the system has no training phase.
+There is one settling operator, one energy, and one qualification test. What changes between using a
+brain and teaching it is which coordinates the operator is allowed to move.
+
+\subsection{Equilibrium propagation}
+The learning contrast of a patch net is equilibrium propagation~\cite{scellier2017}. We restate the
+result and prove it for the energy \eqref{eq:energy}, because the biological and evolutionary
+arguments in \S\S\ref{sec:evo}--\ref{sec:bio} depend on its exact statement.
+
+Let $C(x,y)$ be a differentiable cost, let
+\begin{equation}
+F(x,\beta)=E(x)+\beta\,C(x,y)
+\label{eq:total}
+\end{equation}
+be the total energy, let $x^0=\arg\min_x F(x,0)$ be the free state and
+$x^\beta=\arg\min_x F(x,\beta)$ the nudged state. Define the one-sided contrast
+\begin{equation}
+D(\theta,\beta)=\frac1\beta\Big[\partial_\theta E(\theta,x^\beta)-\partial_\theta E(\theta,x^0)\Big].
+\label{eq:contrast}
+\end{equation}
+
+\begin{theorem}[Equilibrium propagation, fundamental lemma]
+\label{thm:ep}
+Assume $E$ and $C$ are $C^2$, that $x^0$ is a nondegenerate local minimum of $E$ so that
+$H=\nabla_x^2E(\theta,x^0)$ is positive definite, and that $x^\beta$ depends $C^1$ on $(\theta,\beta)$
+in a neighbourhood of $(0,\theta_0)$, which the implicit function theorem supplies. Then
+\begin{equation}
+\lim_{\beta\to0^+}D(\theta,\beta)=\frac{\partial L}{\partial\theta}(\theta),
+\qquad L(\theta)=C\big(x^0(\theta),y\big),
+\end{equation}
+with residual $O(\beta)$. Consequently the update $\Delta\theta=-\eta\,D(\theta,\beta)$ is one step of
+stochastic gradient descent on $L$ with learning rate $\eta$, up to $O(\beta)$.
+\end{theorem}
+\begin{proof}
+Write $g(\theta,\beta,x)=\nabla_xE(\theta,x)+\beta\nabla_xC(x,y)$, so that the two phases satisfy
+$g(\theta,0,x^0)=0$ and $g(\theta,\beta,x^\beta)=0$.
+Differentiating the second identity in $\beta$ at $\beta=0$,
+\[
+H\,\partial_\beta x^\beta\big|_{\beta=0}+\nabla_xC(x^0,y)=0
+\quad\Longrightarrow\quad
+\partial_\beta x^\beta\big|_{\beta=0}=-H^{-1}\nabla_xC(x^0,y).
+\]
+Differentiating the first identity in $\theta$ gives
+$\partial_\theta x^0=-H^{-1}\partial^2_{x\theta}E$. By the chain rule,
+\[
+\frac{\partial L}{\partial\theta}
+=\big(\partial_\theta x^0\big)^{\!\top}\nabla_xC(x^0,y)
+=-\big(\partial^2_{x\theta}E\big)^{\!\top}H^{-1}\nabla_xC(x^0,y),
+\]
+where $H$ is symmetric because $E\in C^2$. On the other side, the implicit function theorem makes
+$\beta\mapsto\partial_\theta E(\theta,x^\beta)$ differentiable at $\beta=0$ with derivative
+$\partial^2_{\theta x}E\cdot\partial_\beta x^\beta|_{\beta=0}
+=-\partial^2_{\theta x}E\,H^{-1}\nabla_xC(x^0,y)$. The two expressions agree because
+$\partial^2_{\theta x}E$ and $\partial^2_{x\theta}E$ are transposes and $H^{-1}$ is symmetric. The
+residual is the first-order Taylor remainder of that map, which is $O(\beta)$ under the stated
+regularity.
+\end{proof}
+
+\begin{corollary}[Locality]
+The contrast for coordinate $\theta_k$ uses only the two values of $\partial_{\theta_k}E$ at the two
+states, both of which are available at the location of that parameter. No transposed weight matrix, no
+stored forward pass and no separate error circuit is required.
+\end{corollary}
+
+\begin{corollary}[Equality with backpropagation through time]
+For discrete-time dynamics whose transition function derives from a primitive, the first $K$ second-phase
+updates equal the negatives of the first $K$ gradients of backpropagation through time, and in
+continuous time the second-phase temporal derivative, rescaled by $1/\beta$, equals the error
+derivatives computed iteratively by recurrent backpropagation~\cite{scellier2019,ernoult2019}. Stopping
+the second phase early is truncated recurrent backpropagation.
+\end{corollary}
+
+\subsection{The centred contrast is second order}
+\label{sec:centred}
+The contrast \eqref{eq:contrast} is a finite difference in $\beta$. A one-sided difference is first-order
+accurate; a centred difference is second-order. Implementations use the centred form, running the nudge
+in both directions from the same free state.
+
+\begin{theorem}[Order of the centred contrast]
+\label{thm:centred}
+Let $f(\beta)=\partial_\theta E(\theta,x^\beta)$ and suppose $f$ is $C^3$ near $\beta=0$. Define the
+centred contrast
+\begin{equation}
+D_{\text{ctr}}(\theta,\beta)=\frac{1}{2\beta}\Big[\partial_\theta E(\theta,x^{+\beta})-\partial_\theta E(\theta,x^{-\beta})\Big].
+\label{eq:centred}
+\end{equation}
+Then $D_{\text{ctr}}=\partial_\theta L+O(\beta^2)$, whereas $D=\partial_\theta L+O(\beta)$.
+\end{theorem}
+\begin{proof}
+By Theorem~\ref{thm:ep}, $f$ is the restriction to the equilibrium branch of a $C^2$ map, and $x^\beta$
+is the minimiser of $E+\beta C$ for both signs of $\beta$ by the same implicit equation with $\beta$
+replaced by $-\beta$. The centred difference $(f(\beta)-f(-\beta))/(2\beta)$ equals $f'(0)$ plus the
+third-order Taylor remainder of $f$, which is $O(\beta^2)$ because the even-order terms cancel by
+antisymmetry of the difference. The one-sided difference $(f(\beta)-f(0))/\beta$ equals $f'(0)$ plus
+the second-order remainder, which is $O(\beta)$. Theorem~\ref{thm:ep} identifies $f'(0)$ with
+$\partial_\theta L$.
+\end{proof}
+
+Note that the centred form costs one extra settling phase and no extra state storage: both nudged
+phases start from the same free state. The improvement is not cosmetic. Example~\ref{ex:chain} measures
+a factor of $15.6$ in accuracy at $\beta=4\times10^{-2}$ and the fitted orders $1.00$ and $1.94$.
+
+\subsection{Three-factor plasticity realises the contrast}
+The contrast is a product of two local activities and one broadcast scalar, which is the structure of a
+three-factor plasticity rule: a synapse-local eligibility trace set by pre- and post-synaptic
+co-activation, and a third factor that gates the weight change. The reference implementation carries
+exactly this: every synapse keeps a trace of what its own two endpoints did in the two phases, a critic
+population predicts return from the settled state, and a single neuromodulatory signal broadcasts the
+temporal-difference error of that prediction, with the weight change proportional to the product of the
+three~\cite{gerstner2018,fremaux2015}. The eligibility trace's time constant has to match the interval
+between an action and its outcome, which in the biological literature is on the order of a second. In
+the notation of this paper the gate is the nudge and the trace is the pair of settled phases. The
+existence of a third broadcast factor is what allows the contrast to be read without a backward pass.
+
+\section{The evolutionary layer}
+\label{sec:evo}
+
+\subsection{Meta-parameters and the lifetime map}
+Evolution cannot act on the weights of a settling brain within a life, and it does not need to. Following
+the reference design~\cite{cadence,evolution}, the inherited object is a \emph{genome} that decides the
+brain's regions, their sizes and their projections. We take
+\begin{equation}
+\varphi=\big(\text{wiring mask }A_\varphi,\ \text{energy form }E_\varphi,\ \text{plasticity constants }(\eta,\beta,\rho)\big)\in\Phi
+\end{equation}
+and we insist that $\varphi$ \emph{does not contain} the weights learned within a life. A lifetime is
+defined by a task stream $\omega$ drawn from $(\Omega,\nu)$ and the EP map
+\begin{equation}
+\Lambda:\Phi\times\Omega\to\Theta,\qquad
+\Lambda(\varphi,\omega)=\theta_K,\qquad
+\theta_{k+1}=\theta_k-\eta\,D(\theta_k,\beta),
+\label{eq:lifetime}
+\end{equation}
+with $D$ the contrast of \eqref{eq:contrast}. The effective fitness of a meta-parameter is the
+\emph{post-learning} fitness
+\begin{equation}
+\hat J(\varphi)=\E_{\omega\sim\nu}\big[J\big(\Lambda(\varphi,\omega),\omega\big)\big].
+\label{eq:baldwin}
+\end{equation}
+This is the Baldwinian fitness: not what the individual can do at birth, but what it attains after a
+life of learning. The population is a measure $\rho\in\cP_2(\Phi)$ evolving by a replicator-mutator
+flow
+\begin{equation}
+\partial_t\rho=\varepsilon\Big[\kappa\,\Delta_\varphi\rho-\nabla_\varphi\!\cdot\big(\rho\,\nabla_\varphi(-\hat J)\big)\Big],
+\qquad \varepsilon=\tau_{\text{life}}/\tau_{\text{evolution}}\ll1 .
+\label{eq:replicator}
+\end{equation}
+
+\subsection{Two-timescale averaging}
+\begin{theorem}[Averaging to the Baldwinian flow]
+\label{thm:averaging}
+Assume
+\emph{(H1)} for every $\varphi$ in a compact set the fast system \eqref{eq:lifetime} has an attractor
+$\mathcal{A}(\varphi)$ attracting at a rate $\lambda_0>0$ uniformly in $\varphi$, with a uniformly
+absorbing neighbourhood of the initial states;
+\emph{(H2)} the relevant maps are Lipschitz, $J$ is bounded, $\Lambda$ is measurable, and
+$\hat J\in C^1(\Phi)$;
+\emph{(H3)} the mutation kernel is conservative with a spectral gap.
+Then as $\varepsilon\to0$ the slow trajectories converge uniformly on finite time intervals to the
+solution of \eqref{eq:replicator} with drift $\nabla_\varphi\hat J$, and the empirical measure of a
+population of $N$ coupled individuals converges weakly to the same flow.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Write the pair as a singularly perturbed system $\dot\varphi=\varepsilon f(\varphi,\theta)$,
+$\dot\theta=g(\varphi,\theta)+\sigma\xi$. Assumption (H1) makes the fast flow converge to a
+$\varphi$-indexed invariant manifold, and Tikhonov's theorem for uniformly asymptotically stable
+fast dynamics gives uniform convergence on $[0,T]$ to the restricted equation. The restricted drift is
+the ergodic average of $f$ along the fast flow. By definition \eqref{eq:baldwin},
+$\hat J$ \emph{is} that average, so the restricted drift is $\nabla_\varphi\hat J$. The measure-valued
+statement follows by compactness of the empirical measures under the standard propagation-of-chaos
+argument, with (H2) giving continuity of the drift functional in the weak topology and (H3) keeping the
+diffusion from degenerating.
+\end{proof}
+
+\begin{remark}
+Theorem~\ref{thm:averaging} is where the Baldwin effect stops being a metaphor. Whether evolution sees
+the innate fitness or the post-learning fitness is not a modelling choice; it is decided by the
+time-scale ratio, and the theorem says the limit is the post-learning fitness. It also returns the
+error scale: the deviation from the averaged flow is $O(\varepsilon)$, which prices how fast a lifetime
+must be relative to a generation.
+\end{remark}
+
+\subsection{Decomposition}
+\begin{proposition}[Price-type decomposition]
+\label{prop:price}
+Write $\hat J=\hat J_0+\Delta\hat J_{\text{learn}}$, where $\hat J_0$ is the fitness with learning
+frozen and $\Delta\hat J_{\text{learn}}\ge0$ is the gain from a lifetime of learning. Then the
+per-generation change of mean fitness decomposes as
+\begin{equation}
+\overline{\Delta\hat J}=
+\underbrace{\frac{\Cov_\rho(w,\hat J_0)}{\bar w}}_{\text{innate selection}}
++\underbrace{\frac{\Cov_\rho(w,\Delta\hat J_{\text{learn}})}{\bar w}}_{\text{plasticity selection}}
++\underbrace{\E_\rho\big[\Delta\hat J_{\text{learn}}\big]_{\text{transmission}}}_{\text{Baldwin accommodation}}
++\underbrace{\mathcal{M}}_{\text{mutation}} .
+\label{eq:price}
+\end{equation}
+At a stationary population $\rho^\star$ of \eqref{eq:replicator} the gradient condition
+$\nabla\hat J=\kappa\nabla\log\rho^\star$ holds, so both covariance terms vanish and only
+accommodation and mutation remain.
+\end{proposition}
+\begin{proof}
+\begin{sloppypar}
+The first two terms are the standard Price covariance of trait and fitness with the trait split into
+its two components. The stationarity claim follows by differentiating
+$\cF(\rho)=-\langle\hat J\rangle_\rho+\kappa H(\rho)$ and using the gradient-flow identity of
+Theorem~\ref{thm:dissipation}: stationarity gives
+$\nabla\big(\delta\cF/\delta\rho\big)=0$, which is $\nabla\hat J=\kappa\nabla\log\rho^\star$, and the
+covariance of the fitness with itself vanishes at that point.
+\end{sloppypar}
+\end{proof}
+
+\subsection{Population dissipation}
+\begin{theorem}[Free-energy dissipation]
+\label{thm:dissipation}
+Let $\cF(\rho)=-\langle\hat J\rangle_\rho+\kappa H(\rho)$ with $H$ the differential entropy relative
+to a fixed reference. Solutions of \eqref{eq:replicator} satisfy
+\begin{equation}
+\frac{\mathrm d}{\mathrm dt}\cF(\rho_t)=-\int_\Phi\rho\,\Big|\nabla_\varphi\Big(\frac{\delta\cF}{\delta\rho}\Big)\Big|^2\mathrm d\varphi\le0,
+\end{equation}
+with equality if and only if $\rho=\rho^\star\propto e^{\hat J/\kappa}$. The four layers of the system
+carry a nested Lyapunov family $\{E,\,L,\,\cF_{\text{projection}},\,\cF\}$, one per time scale.
+\end{theorem}
+\begin{proof}
+Equation~\eqref{eq:replicator} is the Wasserstein-2 gradient flow of $\cF$, so
+$\partial_t\rho=\nabla\cdot(\rho\nabla\frac{\delta\cF}{\delta\rho})$. Substituting into
+$\frac{\mathrm d}{\mathrm dt}\cF=\int\frac{\delta\cF}{\delta\rho}\partial_t\rho$ and integrating by
+parts gives the identity. The equilibrium condition
+$-\nabla\hat J+\kappa\nabla\log\rho=0$ gives $\rho^\star\propto e^{\hat J/\kappa}$. The nested family
+is Theorems 1, \ref{thm:ep} and \ref{thm:dissipation} together with the information-projection
+inequality at the consolidation scale.
+\end{proof}
+
+\begin{remark}[Energy accounting]
+Theorem~\ref{thm:dissipation} is a statement about structure, not about joules. The thermodynamic
+account is separate and less favourable than the structural one: quasi-static analog inference can in
+principle be reversible with no thermodynamic floor, while training carries a lower bound linear in the
+dataset size and the parameter count, of the same order as the digital
+estimate~\cite{thermo_bounds}. The literature on thermodynamic computing reports a large advantage at
+inference and no comparable advantage in training. A claim that this architecture saves energy while
+learning would need its own measurement.
+\end{remark}
+
+\section{Biological compliance}
+\label{sec:bio}
+
+\subsection{Six formal criteria}
+A construction can be called biologically motivated without being checked against biology. We make the
+check possible by writing the basic regularities of biological evolution as formal conditions on the
+permitted dynamics.
+\begin{criterion}[Blind variation]
+The mutation operator $M(\varphi'\mid\varphi)$ is statistically independent of the fitness $\hat J$ and
+of the task distribution $\nu$.
+\end{criterion}
+\begin{criterion}[Causal and post hoc selection]
+Fitness is measured only after a phenotype has performed, and selection acts only through reweighting
+of the population measure; it never writes into an individual's internal state during its life.
+\end{criterion}
+\begin{criterion}[Heredity and the Weismann barrier]
+The heritable object is bounded in fidelity, and changes acquired within a life do not enter the germ
+line by default.
+\end{criterion}
+\begin{criterion}[Thermodynamic constraint]
+Every layer dissipates non-negative free energy, and no mechanism obtains fitness at zero cost.
+\end{criterion}
+\begin{criterion}[Time-scale separation]
+Settling is fast, lifetime learning is intermediate, evolution is slow, so that learning is not
+silently a second selection channel.
+\end{criterion}
+\begin{criterion}[Redundancy]
+Phenotype is robust to parameter perturbation, with degenerate pathways supplying damage tolerance.
+\end{criterion}
+
+\begin{theorem}[Compliance]
+\label{thm:compliance}
+Let the system be that of \S\S\ref{sec:settling}--\ref{sec:evo} with heritable object $\varphi$ and
+lifetime map \eqref{eq:lifetime}. Then (i) if the mutation operator is independent of $\hat J$ and
+$\nu$, selection acts through $\rho$ alone after the life, and only $\varphi$ is inherited, the system
+satisfies Criteria 1 to 6; (ii) if the inheritance restriction is dropped so that $\theta_K$ is
+transmitted, the system violates Criterion 3, and there exist task distributions $\nu$ on which the
+unrestricted system has strictly lower stationary fitness.
+\end{theorem}
+\begin{proof}
+(i) Independence of the mutation operator is Criterion 1 by construction. Selection acts only through
+the population measure in \eqref{eq:replicator} and the fitness is the post-life quantity
+\eqref{eq:baldwin}, which is Criterion 2. Inheriting $\varphi$ and not $\theta$ is Criterion 3.
+Theorem~\ref{thm:dissipation} gives non-negative dissipation with a strict decrease away from
+equilibrium, and the thermodynamic bound of the remark above supplies the floor for the learning
+layer, which is Criterion 4. The scale separation $\tau_{\text{settle}}\ll\tau_{\text{life}}\ll
+\tau_{\text{evolution}}$ is the hypothesis of Theorem~\ref{thm:averaging}, which is Criterion 5.
+Sparse wiring with high clustering and short paths, the structure measured in the complete
+nematode connectome~\cite{connectome}, gives the degenerate pathways of Criterion 6.
+(ii) Transmitting $\theta_K$ makes an acquired change heritable, which is the negation of Criterion 3.
+For the adaptive claim, take $\nu$ to be a broad or rapidly changing distribution over tasks. The
+restricted system transmits only the capacity to learn, so its population retains the ability to
+specialise within each life; the unrestricted system transmits the specialised weights of the previous
+generation, which are mismatched to the new task and are then forced by the anchor to be unlearned
+before the new task can be fitted. The comparison of Baldwinian against Lamarckian meta-learning
+reports exactly this ordering, with the two regimes swapping when the task distribution is narrow and
+stable~\cite{baldwin}.
+\end{proof}
+
+\begin{remark}
+Part (ii) is worth stating in the form it actually takes. The result does not say that acquired
+inheritance is always worse. It says the two regimes have a boundary, that the boundary is set by how
+fast the task distribution changes, and that the biological default sits on the side of the boundary
+where not inheriting is better. The theory is useful because it parameterises the choice rather than
+pronouncing on it.
+\end{remark}
+
+\subsection{Where the analogy stops}
+Three limits are stated here rather than left to a reader. The units are rate units with a smooth
+prediction function, not spiking neurons, and the reference library says so about itself. The body is a
+simplified model. And the averaging theorem is a statement in the limit of a large population and a
+large time-scale ratio, while a real lineage is finite and drifts.
+
+\section{Worked examples}
+\label{sec:examples}
+
+All numbers in this section are produced by the two scripts listed in Appendix~\ref{app:repro}. The
+first implements the patch law \eqref{eq:patch} directly; the second imports the reference library and
+compares.
+
+\subsection{An exactly solvable instantiation}
+\label{ex:chain}
+Take one patch reading one sensory value $u$ through one weight $w$ with bias $b$, with the activity
+prior switched off, and take the squared cost $C(x,y)=\tfrac12(x-y)^2$. Then
+$t=\tanh(b+wu)$ and $E=\tfrac12(x-t)^2$. The nudged state is obtained by solving a quadratic,
+$x^\beta=(t+\beta y)/(1+\beta)$, and $x^{-\beta}=(t-\beta y)/(1-\beta)$. The parameter gradient is
+$\partial_wE\big|_x=(x-t)\,(1-t^2)u$, so
+\[
+f(\beta)-f(0)=-\frac{\beta(y-t)(1-t^2)u}{1+\beta},
+\qquad
+f(\beta)-f(-\beta)=-\frac{2\beta(y-t)(1-t^2)u}{1-\beta^2}.
+\]
+Since $\partial L/\partial w=(t-y)(1-t^2)u$,
+\begin{equation}
+\boxed{\;D_{\text{one}}=\frac{\partial L}{\partial w}\cdot\frac{1}{1+\beta},
+\qquad
+D_{\text{ctr}}=\frac{\partial L}{\partial w}\cdot\frac{1}{1-\beta^{2}}.\;}
+\label{eq:closedform}
+\end{equation}
+The one-sided contrast is the gradient scaled by $(1+\beta)^{-1}$ and the centred contrast by
+$(1-\beta^2)^{-1}$, so both are exact in closed form and the centred error is the square of the
+one-sided error to leading order. With $w=0.9$, $b=0.2$, $u=0.55$ and $y=0.7$ we have
+$t=0.6011844863$ and $\partial L/\partial w=-0.0347057345$. Table~\ref{tab:closedform} compares the
+numerically computed contrasts against \eqref{eq:closedform}; the largest deviation is
+$4.7\times10^{-11}$.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{rrrr}
+\toprule
+$\beta$ & one-sided (numeric) & one-sided (closed form) & centred (numeric)\\
+\midrule
+$0.100$ & $-0.03155067$ & $-0.03155067$ & $-0.03505630$\\
+$0.050$ & $-0.03305308$ & $-0.03305308$ & $-0.03479272$\\
+$0.020$ & $-0.03402523$ & $-0.03402523$ & $-0.03471962$\\
+$0.010$ & $-0.03436211$ & $-0.03436211$ & $-0.03470921$\\
+\bottomrule
+\end{tabular}
+\caption{The exactly solvable case of \S\ref{ex:chain}. The centred column matches
+$\partial L/\partial w\cdot(1-\beta^2)^{-1}$ to the same $4.7\times10^{-11}$; the target value is
+$\partial L/\partial w=-0.0347057345$.}
+\label{tab:closedform}
+\end{table}
+
+\subsection{Settling, coercion and the role of the prior}
+The second example is a three-patch graph, $p_0$ reading two sensory values, $p_1$ reading $x_0$, a
+sensory value and $x_2$ (a feedback edge), and $p_2$ reading $x_1$, with $\lambda=0.01$. The repair
+trajectory decreases the energy at every accepted sweep over $2001$ sweeps, from $0.22303138$ to
+$0.00396407$, and terminates with a projected stationarity residual of $4.297\times10^{-13}$.
+
+The coercivity bound of Theorem 2 is checked directly: at a random state with $\|x\|_\infty\approx20$,
+$E=209.1931$ while $\tfrac12\sum_i(|x_i|-1)^2=205.0945$, so the bound holds with the expected slack, and
+it holds identically at $\lambda=0$. The prior's real role shows up at the answer. With $\lambda=0$ the
+solve reaches the consistent configuration exactly: $E^\star=0$, largest prediction error
+$3.3\times10^{-16}$. With $\lambda=0.01$ it reaches a compromise: $E^\star=0.00396407$ with largest
+prediction error $1.4\times10^{-2}$. Both are stationary; they answer different questions. This is the
+quantitative form of the statement that qualification measures stationarity and not prediction error.
+
+\subsection{Order of the contrast}
+On the same three-patch graph with the feedback edge, the contrast is compared against the true
+gradient of the free-phase loss, obtained by central differences of the settled free state, which is
+the implicit-function-theorem gradient and not an approximation to it. Table~\ref{tab:order} reports
+both contrasts. Halving $\beta$ halves the one-sided error and quarters the centred error; the fitted
+orders are $1.00$ and $1.94$. At $\beta=4\times10^{-2}$ the centred contrast is more accurate by a
+factor of $15.6$.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{rcc}
+\toprule
+$\beta$ & one-sided $\|D-\partial L/\partial\theta\|$ & centred $\|D-\partial L/\partial\theta\|$\\
+\midrule
+$4.00\times10^{-2}$ & $7.968\times10^{-2}$ & $5.125\times10^{-3}$\\
+$2.00\times10^{-2}$ & $4.096\times10^{-2}$ & $1.283\times10^{-3}$\\
+$1.00\times10^{-2}$ & $2.076\times10^{-2}$ & $3.214\times10^{-4}$\\
+$5.00\times10^{-3}$ & $1.045\times10^{-2}$ & $8.111\times10^{-5}$\\
+$2.50\times10^{-3}$ & $5.245\times10^{-3}$ & $2.116\times10^{-5}$\\
+\midrule
+fitted order & $1.00$ & $1.94$\\
+\bottomrule
+\end{tabular}
+\caption{Contrast error against the exact gradient of the free-phase loss on a three-patch graph with
+a feedback edge. The centred form used by implementations gains three orders of magnitude at
+$\beta=2.5\times10^{-3}$.}
+\label{tab:order}
+\end{table}
+
+\subsection{One operator, and learning that converges}
+On the same graph and at the same point $(x,\theta)$, the state block of the gradient is identical
+whether or not the parameters are eligible: the measured difference is exactly $0.0$, as
+Theorem~\ref{thm:oneop} requires. A learning solve with a clamped output target decreases its anchored
+objective monotonically from $0.50822925$ to $0.03354746$ and terminates with a projected residual of
+$2.459\times10^{-15}$. Feeding six successive experiences through the same operator drives the
+free-phase cost of the clamped target from $9.036\times10^{-3}$ to $2.649\times10^{-4}$ while the
+parameter displacement accumulates steadily, which is the signature of a system that learns from each
+experience without replacing what it had.
+
+\subsection{Agreement with the reference implementation}
+\label{ex:crosscheck}
+The second script imports the reference library at version 0.80.0 and compares, on the same graph,
+state and parameters: the energy, the prediction, the error, and the state, weight and bias gradients.
+The largest absolute difference over all of them is $1.1\times10^{-16}$, which is float64 rounding.
+Driving both implementations from the same initial state with the same budget produces terminal states
+agreeing to $1.018\times10^{-12}$ and terminal energies agreeing to $2.2\times10^{-19}$. A settlement
+through the library's public composition interface qualifies with a stationarity residual of
+$2.8\times10^{-7}$ after seven accepted sweeps. The mathematics in this paper therefore describes the
+implementation that exists, and not a cleaned-up idealisation of it.
+
+\subsection{The evolutionary layer}
+For the evolutionary example we use scalar meta-parameter $\varphi$ standing for plasticity, a lifetime
+of three local updates on a task drawn from the environment, and a metabolic price $\lambda_\varphi$
+for plasticity. The post-learning fitness is
+$\hat J(\varphi)=-\tfrac12(1-\varphi)^6-\lambda_\varphi\varphi^2$ in closed form, whose maximum for
+$\lambda_\varphi=0.35$ is at $\varphi^\star=0.3913$; the estimated maximum on a grid of $161$ values
+agrees with the closed form to $7.2\times10^{-3}$, which is the Monte-Carlo error of the estimate. The
+optimum being interior and positive is the statement that learning is retained: a value of zero would
+mean the lineage switched plasticity off.
+
+Solving \eqref{eq:replicator} on the grid with mutation strength $\kappa=0.02$ decreases the population
+free energy monotonically from $0.379150$ to $0.109856$, and the population measure approaches the
+Gibbs form $e^{\hat J/\kappa}$ to a total-variation distance of $0.0040$. An individual-based
+simulation with $N=4000$ individuals over $400$ generations, where each individual really performs its
+lifetime of updates and is selected on a noisy estimate of its own fitness, reaches mean
+$0.4262\pm0.1402$ against the mean-field prediction $0.4001$. The mean-field flow is thus the limit of
+the finite population, and the residual spread is the finite-population drift that
+Theorem~\ref{thm:averaging} does not claim to capture at first order.
+
+\section{Limits and falsifiable predictions}
+\label{sec:limits}
+
+\subsection{Open problems}
+\begin{enumerate}
+\item \textbf{Uniform hyperbolicity of the fast flow.} Theorem~\ref{thm:averaging} assumes the lifetime
+dynamics attract uniformly across meta-parameters. The settling theorem, Theorem~\ref{thm:convergence},
+guarantees convergence for each fixed configuration, but not uniformly with a rate bounded away from
+zero as the configuration varies. This is the weakest link in the chain and the most useful place to
+push.
+\item \textbf{Non-differentiable meta-parameters.} Part of $\varphi$ is combinatorial, namely the wiring
+mask. The fitness is then not differentiable in $\varphi$ and the averaging theorem needs a stochastic
+approximation or evolution-strategy form, with weaker convergence conditions.
+\item \textbf{Estimator noise inside the fitness.} When $\hat J$ is estimated from finitely many tasks,
+selection and estimation noise interact across generations and the covariance terms of
+Proposition~\ref{prop:price} no longer vanish at the nominal stationary point.
+\item \textbf{Consolidation is not yet inside the unified averaging.} Offline reorganisation at an
+intermediate time scale is described as a constrained information projection, which is the mechanism
+that limits catastrophic forgetting, but its scale separation has not been folded into
+Theorem~\ref{thm:averaging}.
+\item \textbf{Scale.} Every result in this paper is on graphs of a few patches, and the largest systems
+in the reference line of work are small by the standards of contemporary language models. Nothing here
+supports a claim about scale.
+\end{enumerate}
+
+\subsection{Predictions}
+The following are stated so that they can fail.
+\begin{enumerate}
+\item \textbf{Order of the centred contrast.} Any patch net whose second phase is an equilibrium branch
+of a $C^2$ family should show a centred contrast error scaling as $\beta^2$ and a one-sided error
+scaling as $\beta$. A measured first-order centred error refutes Theorem~\ref{thm:centred}.
+\item \textbf{Anchor weight above curvature.} For an anchored learning solve, setting $\rho$ above the
+local curvature of the data term should remove the oscillatory or divergent parameter trajectories seen
+at small $\rho$, and the improvement should track the contraction factor of Theorem~\ref{thm:anchor}.
+\item \textbf{Averaging order.} Doubling the lifetime-to-generation ratio should halve the deviation
+between the individual-based population and the averaged flow. A measured exponent away from one, for
+instance a square-root drift-dominated scaling, refutes the hypotheses of Theorem~\ref{thm:averaging}.
+\item \textbf{Weismann boundary.} On a broad or rapidly changing task distribution, the population that
+inherits only plasticity should reach strictly higher stationary fitness than the population that also
+inherits learned weights, and on a narrow stable distribution the ordering should reverse.
+\end{enumerate}
+
+\section{Conclusion}
+A learning system does not need a backward pass, and it does not need a phase boundary between being
+taught and being used. It needs an energy, a local repair rule that descends it, and a way for the goal
+to enter through exactly one door. We have shown that when the repair is projected gradient descent on
+the patch energy that implementations actually use, the descent is coercive, the iterates converge to a
+single stationary point, inference and learning are provably one operator restricted to different
+coordinates, and the contrast that operator uses is second order rather than first. The evolutionary
+layer sits on top of the same structure and is not an analogy: its effective fitness is the
+post-learning fitness by a theorem, its compliance with the basic regularities of biological evolution
+is proved rather than asserted, and the restriction that acquired weights are not inherited is shown to
+be adaptive on the distributions where it matters. The remaining gaps are stated, and the claim that
+this architecture scales is not made.
+
+\appendix
+
+\section{Reproduction}
+\label{app:repro}
+The evidence in \S\ref{sec:examples} is produced by
+\begin{verbatim}
+python3 src/verify_eep.py     # Parts A-F, numpy only, Python 3.9+
+PYTHONPATH=../cadence/src python3.13 src/cadence_crosscheck.py
+\end{verbatim}
+The first script asserts each claim and exits non-zero if a claim fails. Its parts are: A, analytic
+gradients against central differences ($1.5\times10^{-10}$); B, settling monotonicity, convergence and
+coercivity; C, the order of the one-sided and centred contrasts; D, one operator across two coordinate
+blocks; E, the evolutionary layer; F, the closed-form case of \S\ref{ex:chain}. The second script
+imports the reference library and reproduces \S\ref{ex:crosscheck}. Run logs are archived beside the
+scripts.
+
+\section{Structural agreement with observer-patch consensus}
+The construction of this paper has the shape of a consensus protocol. A finite set of carriers holds
+local state with a declared interface, disagreement is measured by a scalar functional, accepted local
+repairs drive that functional strictly down, and the limit is a public normal form that does not depend
+on the order of repairs. The physics programme that shares this shape derives its consequences from
+three axioms, a finite carrier with a declared boundary, agreement on overlaps, and no structure beyond
+the records~\cite{oph}. The correspondence here is structural, not physical. What the learning case adds
+is the second time scale: consensus among patches is settling, and consensus among lineages is
+selection, and the two are joined by the averaging theorem. That parallel is offered as the reason to
+expect the structure to be reusable, not as evidence for either programme.
+
+\begin{thebibliography}{99}
+\small
+\bibitem{scellier2017} B.~Scellier and Y.~Bengio. Equilibrium propagation: bridging the gap between
+energy-based models and backpropagation. \emph{Frontiers in Computational Neuroscience}, 11:24, 2017.
+\href{https://arxiv.org/abs/1602.05179}{arXiv:1602.05179}.
+\bibitem{scellier2019} B.~Scellier and Y.~Bengio. Equivalence of equilibrium propagation and recurrent
+backpropagation. \emph{arXiv:1810.01310}, 2019.
+\bibitem{ernoult2019} M.~Ernoult, J.~Grollier, D.~Querlioz, Y.~Bengio and B.~Scellier. Updates of
+equilibrium prop match gradients of backprop through time in an RNN with static input.
+\emph{NeurIPS}, 2019.
+\bibitem{laborieux2022} A.~Laborieux and F.~Zenke. Holomorphic equilibrium propagation computes exact
+gradients through finite size oscillations. \emph{NeurIPS}, 2022. \href{https://arxiv.org/abs/2209.00530}{arXiv:2209.00530}.
+\bibitem{kendall2020} J.~Kendall, R.~Pantone, J.~Y.~Zung and Y.~Bengio. Training end-to-end analog
+neural networks with equilibrium propagation. \emph{arXiv:2006.01981}, 2020.
+\bibitem{cadence} B.~Mueller. Cadence: one continuing equilibrium brain. Software, version 0.80.0,
+2026. \url{https://github.com/muellerberndt/cadence}.
+\bibitem{manuscript} B.~Mueller. Cadence: a continuing learning system. Manuscript and design
+documents, Pragma Research, 2026. \url{https://floatingpragma.io/cadence/}.
+\bibitem{evolution} Cadence documentation, \emph{Evolve a brain}: genome, develop, mutate and evolve
+across lives. \url{https://github.com/muellerberndt/cadence/blob/main/docs/evolution.md}.
+\bibitem{absil} P.-A.~Absil, R.~Mahony and B.~Andrews. Convergence of the iterates of descent methods
+for analytic cost functions. \emph{SIAM Journal on Optimization}, 16(2):531--547, 2006.
+\bibitem{bolte} J.~Bolte, A.~Daniilidis, A.~Lewis and M.~Shiota. Clarke subgradients of stratifiable
+functions. \emph{SIAM Journal on Optimization}, 18(2):556--572, 2007.
+\bibitem{lojasiewicz} S.~Łojasiewicz. Sur les trajectoires du gradient d'une fonction analytique.
+\emph{Seminari di Geometria}, Bologna, 1982.
+\bibitem{gerstner2018} W.~Gerstner, M.~Lehmann, V.~Liakoni, D.~Corneil and J.~Brea. Eligibility traces
+and plasticity on behavioral time scales: experimental support of neoHebbian three-factor learning
+rules. \emph{Frontiers in Neural Circuits}, 12:53, 2018.
+\bibitem{fremaux2015} N.~Fr\'emaux and W.~Gerstner. Neuromodulated spike-timing-dependent plasticity,
+and theory of three-factor learning rules. \emph{Frontiers in Neural Circuits}, 9:85, 2015.
+\bibitem{baldwin} C.~Fernando, J.~Syrota and J.~E.~Pompeu. Meta-learning by the Baldwin effect.
+\emph{GECCO Companion}, 2018. \href{https://arxiv.org/abs/1806.07917}{arXiv:1806.07917}.
+\bibitem{connectome} D.~S.~Bassett and E.~Bullmore. Small-world brain networks revisited.
+\emph{The Neuroscientist}, 2017. \href{https://arxiv.org/abs/1608.05665}{arXiv:1608.05665}.
+\bibitem{thermo_bounds} Thermodynamic bounds on energy use in deep neural networks.
+\href{https://arxiv.org/abs/2503.09980}{arXiv:2503.09980}, 2025.
+\bibitem{hopfield} H.~Ramsauer et al. Hopfield networks is all you need. \emph{ICLR}, 2021.
+\bibitem{friston} K.~Friston. A free energy principle for biological systems. \emph{Entropy},
+14(11):2100--2121, 2012.
+\bibitem{oph} B.~Mueller et al. Observers are all you need; and From observer consensus to standard
+physics. Pragma Research, 2026. \url{https://floatingpragma.io/physics}.
+\end{thebibliography}
+
+\end{document}
