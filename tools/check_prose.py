@@ -67,6 +67,7 @@ BANNED = {
     "That is,": "use a comma",
     "Hence,": "therefore",
     "a lot of": "much",
+    "not merely biological but adaptive": "adaptive rather than merely biological",
     "get a ": "obtain a ",
 }
 
@@ -93,6 +94,8 @@ BANNED_RE = {
     r"\bpowerful\b": "capable / specify",
     r"\bmassive\b": "large",
     r"\bbreakthrough\b": "remove",
+    r"within a life\b": "within a lifetime",
+    r"\bstate of the art\b": "hyphenate as adjective",
 }
 
 

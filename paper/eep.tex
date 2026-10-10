@@ -43,9 +43,9 @@ Settling to a Stable Equilibrium as the Single Primitive of Continual Learning}
 \noindent
 A deployed neural network today ceases to learn at deployment: its parameters are fixed at the end of
 a training phase, and inference is a different kind of computation from training. Biological nervous
-systems have no such boundary. We take the position that the boundary is not a fact about learning but
-a fact about \emph{one} design choice, the choice to separate a forward computation from a backward one,
-and we ask what such a system can achieve when its only primitive is \textbf{settling to a stable equilibrium}.
+systems have no such boundary. We argue that this boundary characterises one design choice, the
+separation of a forward computation from a backward one, rather than learning itself. We ask what a
+system can achieve when its only primitive is \textbf{settling to a stable equilibrium}.
 
 We formalise such a system as a \emph{patch net}: each unit holds local state and predicts it from its
 neighbours, the network repairs disagreement by projected gradient descent on one energy, and the
@@ -53,19 +53,20 @@ settled state constitutes the prediction. Three results follow from the same ope
 coercive real-analytic energy, so its iterates are bounded and converge to a single stationary point,
 which is the precise sense in which the system \emph{always evolves toward a stable equilibrium}.
 (ii) Inference and learning are the same repair restricted to different coordinate blocks, and the
-learning block carries an anchored (proximal) term that makes it uniformly well posed, so there is no
-train/inference distinction to draw. (iii) The learning contrast is equilibrium propagation in the sense
+learning block carries an anchored (proximal) term that makes it uniformly well posed, so that no
+distinction between training and inference arises. (iii) The learning contrast is equilibrium propagation in the sense
 of Scellier and Bengio, and we prove that the one-sided contrast has error $O(\beta)$ while the
 \emph{centred} contrast used by current implementations has error $O(\beta^2)$, with an exactly
 solvable example giving both constants in closed form.
 
 We then lift the structure to a second time scale. Evolution acts on the \emph{meta-parameters} that
 define how the system settles and learns (the wiring mask, the energy's form, the plasticity constants),
-never on the weights learned within a life. We prove a two-timescale averaging theorem whose effective
+never on the weights learned within a lifetime. We prove a two-timescale averaging theorem whose effective
 fitness is the post-learning (Baldwinian) fitness, a Price-type decomposition that separates innate
 selection from the plasticity channel, and a free-energy dissipation identity for the population. The
 construction is checked against the six formal criteria of biological evolution; the inheritance
-restriction is shown to be necessary by a counterexample that is not merely biological but adaptive.
+restriction is shown to be necessary by a counterexample that is adaptive rather than merely
+biological.
 Every quantitative claim is reproduced by two scripts, one of which agrees with the reference
 implementation to $1.1\times10^{-16}$ in float64.
 
@@ -296,7 +297,7 @@ and qualification applies the projected stationarity test to each row's unaverag
 to the shared parameter gradient of the complete mean-plus-anchor objective, so that the tolerance does
 not depend on $B$.
 
-\subsection{Why the anchor matters}
+\subsection{The role of the anchor}
 \begin{theorem}[Well-posedness of the parameter block]
 \label{thm:anchor}
 Fix a bounded box for $\theta$ and let $M=\sup_{\theta}\|\nabla_\theta^2 E\|$ where $E$ is the data
@@ -649,7 +650,7 @@ that the biological default lies on the side of the boundary at which not inheri
 The construction is of interest because it parameterises the choice rather than prescribing it.
 \end{remark}
 
-\subsection{Where the analogy stops}
+\subsection{Limits of the correspondence}
 Three limitations are stated explicitly. The units are rate units with a smooth prediction function
 rather than spiking neurons, as the reference library states of itself. The body model is simplified.
 The averaging theorem is a statement in the limit of a large population and a large time-scale ratio,
@@ -752,7 +753,7 @@ $\beta=2.5\times10^{-3}$.}
 \label{tab:order}
 \end{table}
 
-\subsection{One operator, and learning that converges}
+\subsection{One operator and convergent learning}
 On the same graph and at the same point $(x,\theta)$, the state block of the gradient is identical
 whether or not the parameters are eligible: the measured difference is exactly $0.0$, as
 Theorem~\ref{thm:oneop} requires. A learning solve with a clamped output target decreases its anchored
@@ -841,11 +842,11 @@ the objective enters. We have shown that when the repair is projected gradient d
 energy used by the reference implementation, the descent is coercive, the iterates converge to a single
 stationary point, inference and learning are one operator restricted to different coordinate sets, and
 the contrast computed by that operator is second order rather than first. The evolutionary layer is
-defined on the same structure and is not merely an analogy: its effective fitness is provably the post-learning
-fitness, its compliance with the formal criteria of biological evolution is proved rather than asserted,
-and the restriction that acquired weights are not inherited is shown to be advantageous on the task
-distributions where the distinction matters. The remaining gaps have been stated, and no claim about
-scaling is made.
+defined on the same structure and is not merely an analogy: its effective fitness is provably the
+post-learning fitness, its compliance with the formal criteria of biological evolution is proved rather
+than asserted, and the restriction that acquired weights are not inherited is shown to be advantageous
+on the task distributions where the distinction matters. The remaining gaps have been stated, and no
+claim about scaling is made.
 
 \appendix
 
