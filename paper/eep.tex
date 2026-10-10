@@ -1,5 +1,4 @@
 \documentclass[11pt]{article}
-\usepackage[UTF8,fontset=macnew]{ctex}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{xcolor}
@@ -69,9 +68,6 @@ construction is checked against the six formal criteria of biological evolution;
 restriction is shown to be necessary by a counterexample that is not merely biological but adaptive.
 Every quantitative claim is reproduced by two scripts, one of which agrees with the reference
 implementation to $1.1\times10^{-16}$ in float64.
-
-\medskip
-\noindent\textbf{摘要.}\; 本文把“神经系统始终朝稳定的均衡演化”作为持续学习的唯一原语：网络通过在一个能量函数上的投影梯度修复达到稳定均衡，推理与学习是同一算子作用于不同坐标块，因此不存在训练/推理之分。我们证明该修复过程在强制（coercive）实解析能量上单调下降并收敛到单个驻点；证明学习对比即 Scellier 与 Bengio 的均衡传播（EP），并证明单边对比误差为 $O(\beta)$、而当前实现所用的中心对比误差为 $O(\beta^2)$，且给出可解实例的闭式常数。随后把结构提升到第二时间尺度：进化作用于元参数（连接掩码、能量形式、可塑性常数），不作用于一生所学的权重；我们证明双时间尺度平均化定理（有效适应度为后学习适应度）、Price 型分解与族群自由能耗散恒等式，并按生物进化的六条形式判据逐条检验。全部定量结论由两个脚本复现，其中与参考实现的最大偏差为 $1.1\times10^{-16}$。
 
 \end{abstract}
 
