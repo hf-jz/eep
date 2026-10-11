@@ -410,7 +410,9 @@ D(\theta,\beta)=\frac1\beta\Big[\partial_\theta E(\theta,x^\beta)-\partial_\thet
 
 \begin{theorem}[Equilibrium propagation, fundamental lemma]
 \label{thm:ep}
-Assume $E$ and $C$ are $C^2$, that $x^0$ is a nondegenerate local minimum of $E$ so that
+Assume $E$ and $C$ are $C^2$, that the cost is independent of the parameters,
+$\partial_\theta C=0$, as it is for the squared output cost of a patch net, that $x^0$ is a
+nondegenerate local minimum of $E$ so that
 $H=\nabla_x^2E(\theta,x^0)$ is positive definite, and that $x^\beta$ depends $C^1$ on $(\theta,\beta)$
 in a neighbourhood of $(0,\theta_0)$, which the implicit function theorem supplies. Then
 \begin{equation}
@@ -451,6 +453,13 @@ states, both of which are available at the location of that parameter. No transp
 stored forward pass and no separate error circuit is required.
 \end{corollary}
 
+\begin{remark}[The general cost]
+If the cost does depend on the parameters, as it does when a regulariser is written into $C$, the
+objective acquires the extra term $\partial_\theta C(\theta,x^0)$ and the contrast alone is no longer
+the gradient. This is the general statement of the source, whose equivalent form keeps that
+term~\cite{scellier2017}; the patch net excludes it by construction.
+\end{remark}
+
 \begin{corollary}[Equality with backpropagation through time]
 For discrete-time dynamics whose transition function derives from a primitive, the first $K$ state
 updates of the second phase coincide, up to sign, with the first $K$ error terms that backpropagation
@@ -462,9 +471,11 @@ the second phase early is truncated recurrent backpropagation.
 
 \subsection{The centred contrast is second order}
 \label{sec:centred}
-The contrast \eqref{eq:contrast} is a finite difference in $\beta$. A one-sided difference is first-order
-accurate; a centred difference is second-order. Implementations use the centred form, running the nudge
-in both directions from the same free state.
+The contrast \eqref{eq:contrast} is a finite difference in $\beta$. The source evaluates the one-sided
+form, taking the limit $\beta\to0^{+}$ and using a random sign of $\beta$ in the second
+phase~\cite{scellier2017}. A one-sided difference is first-order
+accurate; a centred difference, which contrasts a $+\beta$ and a $-\beta$ nudge from the same free
+state, is second-order. Implementations use the centred form.
 
 \begin{theorem}[Order of the centred contrast]
 \label{thm:centred}
@@ -855,7 +866,9 @@ whether or not the parameters are eligible: the measured difference is exactly $
 Theorem~\ref{thm:oneop} requires. A learning solve with a clamped output target decreases its anchored
 objective monotonically from $0.50822925$ to $0.03354746$ and terminates with a projected residual of
 $2.459\times10^{-15}$. Presenting six successive experiences to the same operator reduces the
-free-phase cost of the clamped target from $9.036\times10^{-3}$ to $2.649\times10^{-4}$, while the
+free-phase cost of the clamped target from $9.036\times10^{-3}$ to $2.649\times10^{-4}$, which is the
+patch-net instance of the source's statement that for small $\beta>0$ the nudged fixed point has lower
+cost than the free fixed point~\cite{scellier2017}, while the
 parameter displacement accumulates steadily. This is characteristic of a system that learns from each
 experience without discarding what it has already acquired.
 
