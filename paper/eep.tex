@@ -168,6 +168,16 @@ so that they cannot conceal a disagreement. Residual edges must be acyclic, sinc
 quantities; state edges may be recurrent, which allows a later patch to influence an earlier
 one through the same energy. Sensory coordinates are boundary values, held fixed throughout a solve.
 
+Nothing in \eqref{eq:patch} or \eqref{eq:energy} requires the connections to be symmetric. Each
+directed edge carries its own weight, and the energy depends on the parameters only through the
+predictions, so an edge and its reverse are independent parameters:
+$\partial E/\partial w_e=-e_i(1-p_i^2)s_e$ for the edge that targets patch $i$. Symmetric weights are
+a property of the Hopfield energy used in the prototype of equilibrium
+propagation~\cite{scellier2017}, which is a quadratic form in the activations and therefore depends on
+the connectivity only through its symmetric part, so that one parameter per undirected edge is
+visible to it and an antisymmetric component is not. The source names that requirement as the
+principal biological difficulty of the model. The patch net does not inherit it.
+
 Equation~\eqref{eq:energy} is the settling objective of the reference library~\cite{cadence}; the
 implementation reproduces its value and every analytic derivative to machine precision
 (Example~\ref{ex:crosscheck}). The activity prior with weight $\lambda$ is part of the model rather
@@ -198,6 +208,10 @@ point may retain nonzero prediction errors, and a qualified point may be inconsi
 underlying task.
 
 \subsection{Descent}
+In the continuous-time formulation of the source the energy identity
+$\mathrm dF/\mathrm dt=-\|\nabla_xF\|^2\le0$ is immediate~\cite{scellier2017}. A discrete projected
+iteration with backtracking is not a gradient flow, and the corresponding statement needs its own
+argument, which is the content of the following theorem.
 \begin{theorem}[Lyapunov descent]
 \label{thm:descent}
 Let $F$ be $C^1$ on the box, suppose every candidate step of \eqref{eq:repair} is accepted only when the
@@ -394,7 +408,13 @@ system and teaching it consists solely in which coordinates the operator may mov
 \subsection{Equilibrium propagation}
 The learning contrast of a patch net is equilibrium propagation~\cite{scellier2017}. We restate the
 result and prove it for the energy \eqref{eq:energy}, because the biological and evolutionary
-arguments in \S\S\ref{sec:evo}--\ref{sec:bio} depend on its exact statement.
+arguments in \S\S\ref{sec:evo}--\ref{sec:bio} depend on its exact statement. The source states the
+lemma for a fixed point that exists and is nondegenerate, and it treats the free fixed point as a
+selected branch of the set of local minima. In the patch net the existence and the branch are
+consequences of the settling rule rather than assumptions: the sublevel sets are bounded by
+Theorem~\ref{thm:coercive} and Theorem~\ref{thm:convergence} gives convergence to a single stationary
+point from a given initial state. Positive definiteness of the Hessian at that point remains a
+hypothesis.
 
 Let $C(x,y)$ be a differentiable cost, let
 \begin{equation}
@@ -512,7 +532,11 @@ temporal-difference error of that prediction, with the weight change proportiona
 three~\cite{gerstner2018,fremaux2015}. The time constant of the eligibility trace must match the
 interval between an action and its outcome, which in the biological literature is on the order of a
 second. In the notation of this paper the gate is the nudge and the trace is the pair of settled
-phases. The third broadcast factor permits the contrast to be read without a backward pass.
+phases. The third broadcast factor permits the contrast to be read without a backward pass. A
+continuous-time reading, in which the weights move during the relaxation rather than between two
+settled states, requires plasticity to be slow compared with settling, which is Criterion 5 of
+\S\ref{sec:bio}: otherwise the state being compared has already moved and the contrast in
+\eqref{eq:contrast} is not the quantity the lemma bounds.
 
 \section{The evolutionary layer}
 \label{sec:evo}
