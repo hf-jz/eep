@@ -141,6 +141,21 @@ the evolutionary layer has been validated on hardware. \S\ref{sec:limits} states
 four falsifiable predictions. The empirical results reported here are numerical and confined to small graphs; they are evidence
 about the mathematical claims and not about capability.
 
+The results that are not new are identified as such. The learning contrast and its identification with
+the gradient of the loss at infinitesimal nudge are due to Scellier and
+Bengio~\cite{scellier2017} and are restated here with a proof for the patch energy. The formulation of
+the same rule on a general vector field, the separation of the finite-nudge bias from the bias due to
+asymmetry of the Jacobian, and the homeostatic remedy are due to Scellier et al.\ and to Laborieux and
+Zenke~\cite{scellier2018,laborieux2024}, and exact gradients at finite nudge from a thermal ensemble
+and from a Cauchy integral over an oscillating nudge are due to Litman and to Laborieux and
+Zenke~\cite{litman2025,laborieux2022}. What is claimed here is the settling theory of
+\S\ref{sec:settling} (coercivity, descent for the discrete projected rule, and convergence to a single
+stationary point with a rate), the anchored parameter block and the identity of the two solves in
+\S\ref{sec:oneop}, the order of the centred contrast for the patch energy in
+\S\ref{sec:centred}, and the evolutionary layer of \S\ref{sec:evo} with its compliance argument in
+\S\ref{sec:bio}. The convergence assumption that this literature states and leaves open is the one
+supplied in \S\ref{sec:settling}.
+
 \section{The settling primitive}
 \label{sec:settling}
 
@@ -168,15 +183,21 @@ so that they cannot conceal a disagreement. Residual edges must be acyclic, sinc
 quantities; state edges may be recurrent, which allows a later patch to influence an earlier
 one through the same energy. Sensory coordinates are boundary values, held fixed throughout a solve.
 
-Nothing in \eqref{eq:patch} or \eqref{eq:energy} requires the connections to be symmetric. Each
-directed edge carries its own weight, and the energy depends on the parameters only through the
-predictions, so an edge and its reverse are independent parameters:
-$\partial E/\partial w_e=-e_i(1-p_i^2)s_e$ for the edge that targets patch $i$. Symmetric weights are
-a property of the Hopfield energy used in the prototype of equilibrium
-propagation~\cite{scellier2017}, which is a quadratic form in the activations and therefore depends on
-the connectivity only through its symmetric part, so that one parameter per undirected edge is
-visible to it and an antisymmetric component is not. The source names that requirement as the
-principal biological difficulty of the model. The patch net does not inherit it.
+Nothing in \eqref{eq:patch} or \eqref{eq:energy} requires the connections to be symmetric, and two
+different symmetries are worth separating, because only the second is used anywhere below. The first
+is symmetry of the parameters. A quadratic coupling such as the Hopfield energy of the
+prototype~\cite{scellier2017,hopfield} depends on the weights only through their symmetric part, so
+one parameter per undirected edge is all that such an energy can see, and the source names that
+requirement as the principal biological difficulty of the model. The patch energy is not a quadratic
+form in the activations. Each directed edge carries its own weight and enters the energy only through
+the prediction of the patch it targets, $\partial E/\partial w_e=-e_i(1-p_i^2)s_e$, so the two
+directions can carry different weights and both are visible to the energy. The second symmetry is
+symmetry of the Jacobian of the settling dynamics, and that one is automatic rather than assumed:
+settling is a gradient flow of a scalar energy, so its Jacobian is $\nabla_x^2E$, symmetric by the
+symmetry of second derivatives. The generalised formulation of equilibrium propagation on an arbitrary
+vector field makes this the operative condition, its error vector agrees with the true one only when
+that Jacobian is symmetric, and its asymmetry is a separate source of
+bias~\cite{scellier2018,laborieux2024}.
 
 Equation~\eqref{eq:energy} is the settling objective of the reference library~\cite{cadence}; the
 implementation reproduces its value and every analytic derivative to machine precision
@@ -414,7 +435,9 @@ selected branch of the set of local minima. In the patch net the existence and t
 consequences of the settling rule rather than assumptions: the sublevel sets are bounded by
 Theorem~\ref{thm:coercive} and Theorem~\ref{thm:convergence} gives convergence to a single stationary
 point from a given initial state. Positive definiteness of the Hessian at that point remains a
-hypothesis.
+hypothesis. Recent treatments make the same assumption explicitly, list convergence to an equilibrium
+as a limitation of the method rather than a property of it~\cite{laborieux2024}, and take the loss to
+be independent of the parameters~\cite{litman2025}, which is the convention used here.
 
 Let $C(x,y)$ be a differentiable cost, let
 \begin{equation}
@@ -521,6 +544,17 @@ The centred form requires one additional settling phase and no additional state 
 nudged phases start from the same free state. The difference in accuracy is substantial:
 Example~\ref{ex:chain} reports a factor of $15.5$ at $\beta=4\times10^{-2}$, with fitted orders $1.00$
 and $1.94$.
+
+The finite-nudge bias is a known feature of the deterministic rule, and there are two exits from it
+that do not go through the centred difference. In a thermal ensemble the contrast of expectations is
+the exact gradient of a free-energy difference at every finite $\beta$ and every temperature, so the
+bias is absent once the two states are Gibbs samples rather than minimisers~\cite{litman2025}; for
+complex-differentiable dynamics a Cauchy integral over an oscillating nudge recovers the exact state
+derivative at finite amplitude, which removes the finite-nudge bias and leaves the bias from
+asymmetry of the Jacobian to be handled separately~\cite{laborieux2022,laborieux2024}. The centred
+difference proved above is the deterministic real-valued variant: it reduces the bias from $O(\beta)$
+to $O(\beta^2)$ and does not remove it. It is the form the reference implementation uses, and neither
+exact route is available to it without a stochastic ensemble or complex-valued dynamics.
 
 \subsection{Three-factor plasticity realises the contrast}
 The contrast is a product of two local activities and one broadcast scalar, which is the structure of a
@@ -696,7 +730,8 @@ thermodynamic account is separate, and it splits in the same direction as the st
 equilibrium physical network the free energy is independent of the input and of the parameters, so
 quasi-static inference requires no work at all, while writing the parameters carries an irreducible
 cost of a few $k_BT$ each, which survives the quasi-static limit and is set by the memory rather than by
-the arithmetic~\cite{thermo_bounds}. The consequence for this architecture is
+the arithmetic~\cite{thermo_bounds}; an analog substrate is the natural place for the free part, since
+it relaxes by its own dynamics~\cite{kendall2020}. The consequence for this architecture is
 structural, not a measured energy saving: a claim that it reduces the energy cost of
 learning would require separate measurement.
 \end{remark}
@@ -746,7 +781,8 @@ the population measure in \eqref{eq:replicator} and the fitness is the post-life
 \eqref{eq:baldwin}, which is Criterion 2. Inheriting $\varphi$ and not $\theta$ is Criterion 3.
 Theorem~\ref{thm:dissipation} gives non-negative dissipation with a strict decrease away from
 equilibrium, and the thermodynamic bound of the remark above supplies the floor for the learning
-layer, which is Criterion 4. The scale separation $\tau_{\text{settle}}\ll\tau_{\text{life}}\ll
+layer, which is Criterion 4; the variational reading of free energy as an organising principle for
+biological systems is the free-energy principle~\cite{friston}. The scale separation $\tau_{\text{settle}}\ll\tau_{\text{life}}\ll
 \tau_{\text{evolution}}$ is the hypothesis of Theorem~\ref{thm:averaging}, which is Criterion 5.
 Sparse wiring with high clustering and short paths, the structure measured in the complete
 nematode connectome~\cite{connectome}, is the substrate in which the degenerate pathways of
@@ -1025,6 +1061,12 @@ equilibrium prop match gradients of backprop through time in an RNN with static 
 \emph{NeurIPS}, 2019.
 \bibitem{laborieux2022} A.~Laborieux and F.~Zenke. Holomorphic equilibrium propagation computes exact
 gradients through finite size oscillations. \emph{NeurIPS}, 2022. \href{https://arxiv.org/abs/2209.00530}{arXiv:2209.00530}.
+\bibitem{laborieux2024} A.~Laborieux and F.~Zenke. Improving equilibrium propagation without weight
+symmetry through Jacobian homeostasis. \emph{ICLR}, 2024. \href{https://arxiv.org/abs/2309.02214}{arXiv:2309.02214}.
+\bibitem{litman2025} E.~Litman. Finite-nudge equilibrium propagation in thermal ensembles.
+\href{https://arxiv.org/abs/2511.22024}{arXiv:2511.22024}, 2025.
+\bibitem{scellier2018} B.~Scellier, A.~Goyal, J.~Binas, T.~Mesnard and Y.~Bengio. Generalization of
+equilibrium propagation to vector field dynamics. \href{https://arxiv.org/abs/1808.04873}{arXiv:1808.04873}, 2018.
 \bibitem{kendall2020} J.~Kendall, R.~Pantone, J.~Y.~Zung and Y.~Bengio. Training end-to-end analog
 neural networks with equilibrium propagation. \emph{arXiv:2006.01981}, 2020.
 \bibitem{cadence} B.~Mueller. Cadence: one continuing equilibrium brain. Software, version 0.80.0,
