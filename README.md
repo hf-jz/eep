@@ -4,6 +4,9 @@
 
 Paper: [eep.pdf](eep.pdf) &nbsp;|&nbsp; Project page: https://hf-jz.github.io/eep/
 
+Companion paper: [Certified Equilibrium Propagation in Non-Conservative Multistable Systems](gep/cep.pdf)
+&nbsp;|&nbsp; Page: https://hf-jz.github.io/eep/gep/
+
 A patch net has no training phase. Each unit holds local state and predicts it from its
 neighbours, the network repairs disagreement by projected gradient descent on one energy, and the
 settled state is the answer. This repository contains the paper that proves what follows from that

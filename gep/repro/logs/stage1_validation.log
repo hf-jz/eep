@@ -1,0 +1,64 @@
+=== Exact gradient comparison ===
+{'method': 'implicit_true_gradient', 'relative_error_vs_autograd_descent': 1.824653214102882e-16, 'cosine_vs_autograd_descent': 1.0}
+{'method': 'Dyadic_EP_stationary', 'relative_error_vs_autograd_descent': 1.824653214102882e-16, 'cosine_vs_autograd_descent': 1.0}
+{'method': 'central_finite_difference_check', 'relative_error_vs_autograd_gradient': 6.58262671340609e-11, 'cosine_vs_autograd_gradient': 0.9999999999999999}
+{'method': 'Vector_Field_EP', 'relative_error_vs_autograd_descent': 1.5546511684409534, 'cosine_vs_autograd_descent': 0.4305832798663801}
+
+=== Finite nudge ===
+{'beta': 0.4, 'asymep_centered_relative_error': 0.06210567634688691, 'asymep_one_sided_relative_error': 0.2228502120025715, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 2.797157557069881e-17, 'plus_residual': 1.3825648157697098e-16, 'minus_residual': 7.376145397762941e-17}
+{'beta': 0.2, 'asymep_centered_relative_error': 0.015440761405170022, 'asymep_one_sided_relative_error': 0.12327543670319877, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 1.3985787785349405e-17, 'plus_residual': 4.563344992840996e-17, 'minus_residual': 6.216025217875883e-17}
+{'beta': 0.1, 'asymep_centered_relative_error': 0.003852653037575275, 'asymep_one_sided_relative_error': 0.06500041835375123, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 6.992893892674703e-18, 'plus_residual': 5.018720210764824e-17, 'minus_residual': 8.498374721940739e-18}
+{'beta': 0.05, 'asymep_centered_relative_error': 0.0009626606725613179, 'asymep_one_sided_relative_error': 0.03339606616845094, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 3.496446946337351e-18, 'plus_residual': 3.7527806648313014e-17, 'minus_residual': 3.929062510380681e-17}
+{'beta': 0.025, 'asymep_centered_relative_error': 0.00024063327426610814, 'asymep_one_sided_relative_error': 0.016929199067756986, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 1.7482234731686756e-18, 'plus_residual': 5.754080646202387e-17, 'minus_residual': 4.474275247707039e-17}
+{'beta': 0.0125, 'asymep_centered_relative_error': 6.015631770779627e-05, 'asymep_one_sided_relative_error': 0.008523308850638353, 'dyadic_stationary_relative_error': 1.824653214102882e-16, 'dyadic_mean_state_error': 0.0, 'dyadic_stationarity_residual': 8.741117365843378e-19, 'plus_residual': 4.478319351972257e-17, 'minus_residual': 3.06106200023368e-17}
+
+=== Finite time ===
+{'time': 0.25, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.6087723295287782, 'state_plus_error_to_equilibrium': 0.016694399690875453, 'state_minus_error_to_equilibrium': 0.020580486160062184, 'relative_error_to_asymep_finite_beta_limit': 0.6103247013286811}
+{'time': 0.5, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.34305708462319384, 'state_plus_error_to_equilibrium': 0.010588895836762742, 'state_minus_error_to_equilibrium': 0.013886449466718295, 'relative_error_to_asymep_finite_beta_limit': 0.3456217787054298}
+{'time': 1.0, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.06639410860677655, 'state_plus_error_to_equilibrium': 0.004347116294102152, 'state_minus_error_to_equilibrium': 0.006365960681508764, 'relative_error_to_asymep_finite_beta_limit': 0.06990569702303462}
+{'time': 2.0, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.03554242611692256, 'state_plus_error_to_equilibrium': 0.0008221637873783598, 'state_minus_error_to_equilibrium': 0.0014542048998523935, 'relative_error_to_asymep_finite_beta_limit': 0.03193255000728352}
+{'time': 3.0, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.015609425008609486, 'state_plus_error_to_equilibrium': 0.00013814950648510766, 'state_minus_error_to_equilibrium': 0.00029737480510478025, 'relative_error_to_asymep_finite_beta_limit': 0.012174247403517998}
+{'time': 5.0, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.003988336614832429, 'state_plus_error_to_equilibrium': 2.467679699725046e-06, 'state_minus_error_to_equilibrium': 7.583978977750396e-06, 'relative_error_to_asymep_finite_beta_limit': 0.000303948117178879}
+{'time': 8.0, 'dt': 0.01, 'asymep_finite_time_relative_error_vs_autograd': 0.003853562921579634, 'state_plus_error_to_equilibrium': 1.3688274251625817e-08, 'state_minus_error_to_equilibrium': 8.470735013836534e-08, 'relative_error_to_asymep_finite_beta_limit': 1.3109286019350726e-06}
+
+=== Non-normal counterexample ===
+{
+  "J": [
+    [
+      -1.0,
+      10.0
+    ],
+    [
+      0.0,
+      -1.0
+    ]
+  ],
+  "eigenvalues": [
+    {
+      "real": -1.0,
+      "imag": 0.0
+    },
+    {
+      "real": -1.0,
+      "imag": 0.0
+    }
+  ],
+  "condition_number_2": 101.99019513592786,
+  "loss_gradient_q": [
+    0.0,
+    1.0
+  ],
+  "vector_field_response_J_inverse_q": [
+    -10.0,
+    -1.0
+  ],
+  "true_adjoint_response_J_transpose_inverse_q": [
+    0.0,
+    -1.0
+  ],
+  "response_relative_error": 10.0,
+  "max_transient_gain_on_0_to_5": 3.7159551522041023,
+  "time_of_max_transient_gain": 0.98
+}
+
+ALL ASSERTIONS PASSED

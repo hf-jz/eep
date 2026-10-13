@@ -1,0 +1,13 @@
+{
+  "state_error_budget_per_phase": 0.0001,
+  "spectral_norm_B_transpose": 2.942976465310898,
+  "estimated_truncation_coefficient_a": 0.12078461283854486,
+  "worst_case_noise_coefficient_d": 0.00029429764653108985,
+  "beta_opt_formula_unconstrained": 0.10680257590373976,
+  "beta_opt_formula_clipped_to_sweep": 0.10680257590373976,
+  "proxy_error_at_beta_opt": 0.004133294221241505,
+  "empirical_rms_best_beta_on_grid": 0.085,
+  "warning": "beta_opt is optimal for the stated upper-bound proxy, not universally optimal for actual training or all systems.",
+  "combined_error_decomposition_rows": 21,
+  "triangle_inequality_bound_verified": true
+}

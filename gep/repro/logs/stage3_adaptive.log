@@ -1,0 +1,20 @@
+{
+  "assertions": {
+    "adaptive_beta_in_candidate_set": true,
+    "adaptive_T_passed_observed_checks": true,
+    "adaptive_direction_finite": true,
+    "adaptive_direction_error_finite": true,
+    "selected_numerical_indicator_within_budget_factor": true,
+    "adaptive_integrator_agrees_with_dop853": true,
+    "noise_triangle_bounds_pass": true,
+    "directional_and_operator_bounds_pass": true,
+    "non_normal_conditioning_visible": true
+  },
+  "selected_beta": 0.04,
+  "selected_T": 7.078125000000001,
+  "selected_abs_error": 0.00019380759297815678,
+  "selected_rel_error": 0.000618025537164065,
+  "selected_error_indicator": 0.0005995112405123152,
+  "max_product_bound_gap_k10": 1198.5842850460856
+}
+STAGE 3 ALL ASSERTIONS PASSED

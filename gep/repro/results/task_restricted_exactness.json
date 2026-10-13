@@ -1,0 +1,53 @@
+{
+  "A": [
+    [
+      -1.0,
+      6.0
+    ],
+    [
+      0.0,
+      -1.0
+    ]
+  ],
+  "B": [
+    [
+      1.0
+    ],
+    [
+      0.0
+    ]
+  ],
+  "D_Ainv_minus_AinvT": [
+    [
+      0.0,
+      -6.0
+    ],
+    [
+      6.0,
+      0.0
+    ]
+  ],
+  "A_is_symmetric": false,
+  "allowed_loss_gradient_subspace_basis": [
+    [
+      1.0
+    ],
+    [
+      0.0
+    ]
+  ],
+  "restricted_operator_norm": 0.0,
+  "all_loss_gradients_operator_norm": 6.0,
+  "q_good": [
+    1.0,
+    0.0
+  ],
+  "q_good_vf_error": 0.0,
+  "q_bad": [
+    0.0,
+    1.0
+  ],
+  "q_bad_vf_error": 6.0,
+  "restricted_exactness_passes": true,
+  "global_exactness_fails": true
+}

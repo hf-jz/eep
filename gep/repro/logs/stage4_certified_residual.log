@@ -1,0 +1,13 @@
+{
+  "status": "CERTIFICATE_PASSED",
+  "beta_selected": "0.005",
+  "T_selected": 6.0,
+  "max_step_selected": 1.0,
+  "truncation_gradient_error_upper": 0.000365602381944018,
+  "equilibrium_solve_gradient_error_upper": 7.350828900439895e-05,
+  "total_gradient_error_upper": 0.00043911067094841693,
+  "empirical_gradient_error": 1.0764035136131234e-05,
+  "empirical_error_below_certificate": true,
+  "nfev_total": 460
+}
+STAGE 4 CERTIFICATE PASSED

@@ -1,0 +1,19 @@
+{
+  "assertions": {
+    "task_restricted_exactness_can_hold_without_symmetric_A": true,
+    "same_nonsymmetric_A_not_exact_for_all_q": true,
+    "formula_beta_opt_positive": true,
+    "finite_time_error_bound_identity_verified": true,
+    "nonnormal_lyapunov_envelope_valid": true,
+    "nonnormal_lyapunov_gradient_bound_valid": true,
+    "nonnormal_gain_exceeds_one": true,
+    "nonnormal_finite_time_gradient_response_amplifies": true,
+    "nonnormal_gradient_direct_bound_valid": true
+  },
+  "beta_opt": 0.10680257590373976,
+  "empirical_best_beta": 0.085,
+  "max_gain_k10": 7.781679110037203,
+  "max_gain_k20": 15.504802411134117,
+  "gradient_error_amplification_k10": 7.7349782605136985
+}
+STAGE 2 ALL ASSERTIONS PASSED

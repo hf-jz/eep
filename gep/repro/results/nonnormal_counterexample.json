@@ -1,0 +1,38 @@
+{
+  "J": [
+    [
+      -1.0,
+      10.0
+    ],
+    [
+      0.0,
+      -1.0
+    ]
+  ],
+  "eigenvalues": [
+    {
+      "real": -1.0,
+      "imag": 0.0
+    },
+    {
+      "real": -1.0,
+      "imag": 0.0
+    }
+  ],
+  "condition_number_2": 101.99019513592786,
+  "loss_gradient_q": [
+    0.0,
+    1.0
+  ],
+  "vector_field_response_J_inverse_q": [
+    -10.0,
+    -1.0
+  ],
+  "true_adjoint_response_J_transpose_inverse_q": [
+    0.0,
+    -1.0
+  ],
+  "response_relative_error": 10.0,
+  "max_transient_gain_on_0_to_5": 3.7159551522041023,
+  "time_of_max_transient_gain": 0.98
+}

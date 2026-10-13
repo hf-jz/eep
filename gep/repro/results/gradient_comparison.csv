@@ -1,0 +1,5 @@
+method,relative_error_vs_autograd_descent,cosine_vs_autograd_descent,relative_error_vs_autograd_gradient,cosine_vs_autograd_gradient
+implicit_true_gradient,1.824653214102882e-16,1.0,,
+Dyadic_EP_stationary,1.824653214102882e-16,1.0,,
+central_finite_difference_check,,,6.58262671340609e-11,0.9999999999999999
+Vector_Field_EP,1.5546511684409534,0.4305832798663801,,

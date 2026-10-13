@@ -1,0 +1,150 @@
+{
+  "status": "CERTIFICATE_PASSED",
+  "scope": "exact decimal-rational benchmark; all beta in [-0.32,0.32]",
+  "tolerance": 0.0005,
+  "beta_selected": "0.005",
+  "T_selected": 6.0,
+  "max_step_selected": 1.0,
+  "plus_state_float": [
+    0.27036561554023325,
+    -0.3837959484838101,
+    0.1856136367675846
+  ],
+  "minus_state_float": [
+    0.26963306904933704,
+    -0.38621216025614474,
+    0.1843798908537817
+  ],
+  "plus_residual_norm_upper": 7.039622167451412e-08,
+  "plus_residual_norm_upper_exact": "70396221674514112814921/1000000000000000000000000000000",
+  "minus_residual_norm_upper": 7.480533685269368e-08,
+  "minus_residual_norm_upper_exact": "74805336852693689368527/1000000000000000000000000000000",
+  "plus_equilibrium_distance_upper": 1.099940963664283e-07,
+  "plus_equilibrium_distance_upper_exact": "70396221674514112814921/640000000000000000000000000000",
+  "minus_equilibrium_distance_upper": 1.1688333883233389e-07,
+  "minus_equilibrium_distance_upper_exact": "74805336852693689368527/640000000000000000000000000000",
+  "truncation_gradient_error_upper": 0.000365602381944018,
+  "truncation_gradient_error_upper_exact": "10290792194305282493631/28147497671065600000000000",
+  "equilibrium_solve_gradient_error_upper": 7.350828900439895e-05,
+  "equilibrium_solve_gradient_error_upper_exact": "1470165780087978997107411/20000000000000000000000000000",
+  "total_gradient_error_upper": 0.00043911067094841693,
+  "total_gradient_error_upper_exact": "9429829855240340413817273646604539/21474836480000000000000000000000000000",
+  "tolerance_exact": "1/2000",
+  "empirical_gradient_error": 1.0764035136131234e-05,
+  "empirical_error_below_certificate": true,
+  "nfev_total": 460,
+  "accepted_steps_total": 38,
+  "analytic_constants": {
+    "B_frobenius_squared_exact": "1675023/160000",
+    "B_frobenius_numeric": 3.235566990497956,
+    "B_frobenius_upper": 3.24,
+    "q0_norm_interval_upper": 0.4871761727803859,
+    "q0_norm_interval_upper_exact": "243588086390192940632319164291/500000000000000000000000000000",
+    "q0_norm_claimed_upper": 0.488,
+    "alpha_contraction": 0.64,
+    "gershgorin_row_upper_bounds": [
+      -1.0355,
+      -0.6575,
+      -0.962
+    ],
+    "gershgorin_row_upper_bounds_exact": [
+      "-2071/2000",
+      "-263/400",
+      "-481/500"
+    ],
+    "alpha_proved_by_gershgorin_row_upper_max": -0.6575,
+    "alpha_proved_by_gershgorin_row_upper_max_exact": "-263/400",
+    "global_lipschitz_upper": 7.3675,
+    "force_second_derivative_upper": 0.066,
+    "force_third_derivative_upper": 0.08
+  },
+  "selected_beta_derivative_bounds": {
+    "root_radius_upper": 0.0038125,
+    "q_norm_upper": 0.49371875,
+    "x1_upper": 0.771435546875,
+    "x2_upper": 3.677940065661445,
+    "x3_upper": 27.08165792177911,
+    "finite_nudge_gradient_error_upper": 0.000365602381944018
+  },
+  "selected_beta_derivative_bounds_exact": {
+    "root_radius_upper": "61/16000",
+    "q_norm_upper": "15799/32000",
+    "x1_upper": "15799/20480",
+    "x2_upper": "1974579037333/536870912000",
+    "x3_upper": "381140451640936388653/14073748835532800000",
+    "finite_nudge_gradient_error_upper": "10290792194305282493631/28147497671065600000000000"
+  },
+  "attempt_history": [
+    {
+      "beta": "0.02",
+      "status": "skip_truncation_bound_exceeds_tolerance",
+      "truncation_bound": 0.006073576100016605
+    },
+    {
+      "beta": "0.01",
+      "status": "skip_truncation_bound_exceeds_tolerance",
+      "truncation_bound": 0.0014810173826129462
+    },
+    {
+      "beta": "0.005",
+      "T": 4.0,
+      "max_step": 1.0,
+      "rho_plus": 3.1247353616650794e-06,
+      "rho_minus": 3.2618262384232797e-06,
+      "truncation_bound": 0.000365602381944018,
+      "root_residual_bound": 0.0032331968100447316,
+      "total_certificate": 0.0035987991919887497,
+      "nfev_total": 376,
+      "steps_total": 31
+    },
+    {
+      "beta": "0.005",
+      "T": 4.0,
+      "max_step": 0.5,
+      "rho_plus": 3.1247353616650794e-06,
+      "rho_minus": 3.2618262384232797e-06,
+      "truncation_bound": 0.000365602381944018,
+      "root_residual_bound": 0.0032331968100447316,
+      "total_certificate": 0.0035987991919887497,
+      "nfev_total": 376,
+      "steps_total": 31
+    },
+    {
+      "beta": "0.005",
+      "T": 4.0,
+      "max_step": 0.25,
+      "rho_plus": 3.1247353952709176e-06,
+      "rho_minus": 3.2618262696080453e-06,
+      "truncation_bound": 0.000365602381944018,
+      "root_residual_bound": 0.003233196842844975,
+      "total_certificate": 0.003598799224788993,
+      "nfev_total": 436,
+      "steps_total": 36
+    },
+    {
+      "beta": "0.005",
+      "T": 4.0,
+      "max_step": 0.125,
+      "rho_plus": 3.124735396826755e-06,
+      "rho_minus": 3.2618262708867512e-06,
+      "truncation_bound": 0.000365602381944018,
+      "root_residual_bound": 0.0032331968442799626,
+      "total_certificate": 0.0035987992262239803,
+      "nfev_total": 796,
+      "steps_total": 66
+    },
+    {
+      "beta": "0.005",
+      "T": 6.0,
+      "max_step": 1.0,
+      "rho_plus": 7.039622167451412e-08,
+      "rho_minus": 7.480533685269368e-08,
+      "truncation_bound": 0.000365602381944018,
+      "root_residual_bound": 7.350828900439895e-05,
+      "total_certificate": 0.00043911067094841693,
+      "nfev_total": 460,
+      "steps_total": 38
+    }
+  ],
+  "certificate_note": "The certificate is a theorem-backed bound for the defined model, conditional only on the explicitly proved derivative/contractivity bounds and exact rational enclosure implementation. It certifies distance to the equilibrium of the exact decimal-rational vector field at the returned binary64 endpoints; it does not certify the entire computed ODE trajectory or any noisy/uncertain physical model."
+}

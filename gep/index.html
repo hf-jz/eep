@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certified Equilibrium Propagation in Non-Conservative Multistable Systems</title>
+<meta name="description" content="Exact gradient conditions for non-conservative equilibrium systems, a finite-perturbation error budget with computable constants, and an interval certificate that accepts or rejects an equilibrium-propagation update against a tolerance.">
+<link rel="canonical" href="https://hf-jz.github.io/eep/gep/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Certified equilibrium propagation in non-conservative multistable systems">
+<meta property="og:description" content="When is an equilibrium-propagation update trustworthy? A certified bound, two verified benchmarks, and a fail-closed acceptance rule.">
+<meta property="og:url" content="https://hf-jz.github.io/eep/gep/">
+<meta property="og:image" content="https://hf-jz.github.io/eep/gep/assets/fig2_beta_scan.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="author" content="Sheng Cheng">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d4e89'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme:light dark;
+  --bg:#f4f4f2;--panel:#fdfdfc;--ink:#15171b;--muted:#575c65;--line:#dcdcd6;
+  --accent:#1d4e89;--accent-ink:#fff;--soft:#e9eef4;
+  --shadow:0 16px 36px rgba(21,23,27,.10);
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:6px;--maxw:1080px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0f1114;--panel:#16191d;--ink:#eceef1;--muted:#9aa1ab;--line:#282d34;--accent:#8fb4e3;--accent-ink:#0f1114;--soft:#17212c;--shadow:0 18px 40px rgba(0,0,0,.5)}
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;text-decoration-color:var(--line)}
+a:hover{text-decoration-color:var(--accent)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+section{padding:64px 0;border-top:1px solid var(--line);scroll-margin-top:72px}
+html{scroll-behavior:smooth}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+h1,h2,h3{margin:0;line-height:1.12;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3vw,1.95rem);font-weight:640}
+h3{font-size:1.05rem;font-weight:640;letter-spacing:-.01em}
+p{margin:14px 0 0;max-width:66ch;color:var(--ink)}
+.lead{color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;max-width:none}
+.grade{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--accent);border:1px solid var(--line);border-radius:var(--r);padding:3px 8px;white-space:nowrap}
+
+header.nav{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;height:62px;padding:0 24px;display:flex;align-items:center;gap:20px}
+.brand{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-links{margin-left:auto;display:none;gap:22px;font-size:14px}
+.nav-links a{color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--ink)}
+@media (min-width:820px){.nav-links{display:flex}}
+
+.btn{display:inline-block;font-size:14.5px;font-weight:560;padding:10px 18px;border-radius:var(--r);border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--panel)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+
+.hero{max-width:var(--maxw);margin:0 auto;padding:48px 24px 52px;display:grid;gap:40px}
+@media (min-width:900px){.hero{grid-template-columns:1.35fr .65fr;align-items:center;padding-top:56px;gap:40px}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;max-width:none}
+.hero h1{font-size:clamp(1.7rem,3.6vw,2rem);margin-top:14px;font-weight:660}
+.hero .sub{margin-top:18px;max-width:50ch;font-family:var(--serif);font-size:1.14rem;line-height:1.55;color:var(--muted)}
+figure{margin:0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);background:#fff}
+
+.result{background:var(--soft);border-top:1px solid var(--line)}
+.formula{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,4vw,2.2rem);text-align:center;margin:26px 0 0;letter-spacing:.01em;max-width:none}
+.formula .eq{font-style:normal}
+.fig-note{text-align:center;margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.03em;max-width:none}
+.two{display:grid;gap:36px;margin-top:34px}
+@media (min-width:820px){.two{grid-template-columns:1fr 1fr;gap:56px}}
+dl{margin:18px 0 0}
+dt{margin-top:18px;font-weight:600}
+dt:first-child{margin-top:0}
+dd{margin:4px 0 0;color:var(--muted);font-size:15.5px;max-width:52ch}
+.sym{font-family:var(--mono);font-size:13px;color:var(--accent);margin-right:6px}
+
+.titems{margin-top:8px}
+.titem{display:grid;gap:8px;padding:26px 0 26px 20px;border-left:2px solid var(--line)}
+.titem+.titem{margin-top:4px}
+.titem:hover{border-left-color:var(--accent)}
+.titem h3{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.titem p{margin:0;max-width:74ch}
+.tmeta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
+@media (min-width:820px){.titem{grid-template-columns:1fr 300px}.titem>div:first-child{margin-right:24px}}
+
+.strip{display:grid;gap:28px;margin-top:34px}
+@media (min-width:760px){.strip{grid-template-columns:repeat(3,1fr);gap:24px}}
+.strip figcaption{margin-top:12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+
+.rows{margin-top:30px}
+.row{display:grid;gap:6px;padding:22px 0}
+.row+.row{border-top:1px solid var(--line)}
+@media (min-width:820px){.row{grid-template-columns:290px 1fr;gap:36px;align-items:start}.row+.row{border-top:1px solid var(--line)}}
+.row .src{font-size:15px;font-weight:620}
+.row .src span{display:block;font-weight:400;font-size:13.5px;color:var(--muted);margin-top:3px}
+.row p{margin:0;font-size:15.5px;color:var(--muted)}
+
+.panels{display:grid;gap:24px;margin-top:34px}
+@media (min-width:820px){.panels{grid-template-columns:1fr 1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+.panel ul{margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:15.5px}
+.panel li{margin:8px 0}
+.relax{margin-top:34px;display:grid;gap:2px}
+.relax .r{display:grid;gap:4px;padding:14px 0;border-top:1px solid var(--line)}
+@media (min-width:820px){.relax .r{grid-template-columns:1fr 220px;gap:24px;align-items:baseline}}
+.relax .r span:last-child{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+.cols2{display:grid;gap:10px;margin-top:26px}
+@media (min-width:760px){.cols2{grid-template-columns:1fr 1fr;gap:14px 44px}}
+.cols2 div{padding:14px 0;border-top:1px solid var(--line)}
+.cols2 b{display:block;font-size:15px}
+.cols2 span{color:var(--muted);font-size:14.5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.6;margin:26px 0 0;color:var(--ink)}
+table{border-collapse:collapse;margin-top:26px;font-size:14.5px;width:100%;max-width:640px}
+caption{caption-side:bottom;text-align:left;margin-top:12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+th,td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{border-bottom:1px solid var(--ink)}
+tfoot td{font-weight:600;border-bottom:none}
+ol.refs{margin:26px 0 0;padding-left:22px;color:var(--muted);font-size:15px}
+ol.refs li{margin:10px 0}
+.hl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+footer{padding:52px 0 72px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+footer .frow{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:12px}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ScholarlyArticle",
+"name":"Certified Equilibrium Propagation in Non-Conservative Multistable Systems: Exact Gradient Conditions and Finite Perturbation Guarantees",
+"author":{"@type":"Person","name":"Sheng Cheng","affiliation":"Hefei Jiuzhai Big Data Technology Co., Ltd."},
+"datePublished":"2026-10-13","inLanguage":"en","isAccessibleForFree":true,
+"url":"https://hf-jz.github.io/eep/gep/",
+"encoding":{"@type":"MediaObject","contentUrl":"https://hf-jz.github.io/eep/gep/cep.pdf","encodingFormat":"application/pdf"},
+"license":"https://github.com/hf-jz/eep"}
+</script>
+</head>
+
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <span class="brand">cep</span>
+    <nav class="nav-links">
+      <a href="#result">Result</a>
+      <a href="#theorems">Conditions</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#budget">Budget</a>
+      <a href="#scope">Scope</a>
+      <a href="#reproduce">Reproduce</a>
+      <a href="#cite">Cite</a>
+      <a href="cep.pdf">PDF</a>
+      <a href="../index.html">EEP paper</a>
+    </nav>
+    <a class="btn" style="margin-left:auto" href="cep.pdf">Read the paper</a>
+  </div>
+</header>
+
+<main>
+
+<div class="hero">
+  <div>
+    <p class="eyebrow" style="margin:0">Certified equilibrium propagation</p>
+    <h1>When is an equilibrium-propagation update trustworthy?</h1>
+    <p class="sub">Non-conservative dynamics, finite nudging, several stable equilibria. The paper derives the exact gradient conditions, budgets the finite-perturbation error, and returns either a certified interval or a refusal.</p>
+    <div class="cta">
+      <a class="btn primary" href="cep.pdf">Read the paper</a>
+      <a class="btn" href="https://github.com/hf-jz/eep/tree/main/gep">Code and certificates</a>
+    </div>
+  </div>
+  <figure>
+    <img src="assets/fig1_benchmark.png" width="1280" height="580" alt="Phase portrait of the multistable benchmark: two stable equilibria, one saddle, and the certified branch tubes">
+  </figure>
+</div>
+
+<section class="result" id="result">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Benchmark result</p>
+    <h2 style="margin-top:10px">Two stable branches, both endpoints and the whole nudging tube, certified in exact rational arithmetic</h2>
+    <dl class="two">
+      <div>
+        <dt>Selected nudging strength</dt>
+        <dd><span class="sym">beta = 0.005</span> the largest tested candidate whose certified bound is below the tolerance of 1e-5.</dd>
+        <dt>Worst-branch error bound</dt>
+        <dd><span class="sym">7.5271e-6</span> on the branch with exact gradient 67/102, against 7.8826e-7 on the branch with -11/34.</dd>
+      </div>
+      <div>
+        <dt>Branch tube</dt>
+        <dd><span class="sym">2249/13600 = 0.16537</span> preconditioned contraction factor, uniform over beta in [-0.02, 0.02], with a Hurwitz test throughout.</dd>
+        <dt>Rejections</dt>
+        <dd><span class="sym">1.2019e-4</span> and <span class="sym">3.0042e-5</span> for beta = 0.02 and 0.01, plus a wide box spanning all three equilibria rejected at contraction 183/50 = 3.66.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section id="theorems">
+  <div class="wrap">
+    <p class="mono" style="margin:0">What is proved</p>
+    <h2 style="margin-top:10px">Exact conditions, a computable budget, a branch-aware certificate</h2>
+    <div class="titems">
+      <article class="titem">
+        <div>
+          <h3>Exact gradient and the sensitivity-adjoint gap <span class="tmeta">Theorems 2, 4, 5</span></h3>
+          <p>For a smooth non-conservative system with a regular equilibrium, the gradient is d* = B transpose A inverse transpose q. The centred contrast of the uncorrected nudged system returns the sensitivity A inverse q instead, and the difference B transpose (A inverse - A inverse transpose) q is exactly the bias of vector-field EP. Conservative systems hide the gap because A = A transpose.</p>
+        </div>
+        <p class="tmeta">Two quantities that differ by a transpose. On the benchmark the uncorrected rule is wrong by 12 percent relative while its residual is 1e-17.</p>
+      </article>
+      <article class="titem">
+        <div>
+          <h3>Finite nudge, computable constant <span class="tmeta">Theorem 9, Proposition 10</span></h3>
+          <p>The corrected learning phase has Jacobian A transpose at the free equilibrium, so its centred contrast carries the adjoint direction, and the remainder is second order: the error is bounded by (B norm / 6) x3 beta squared, with x3 obtained by implicit differentiation and interval evaluation rather than fitted.</p>
+        </div>
+        <p class="tmeta">Observed order 2.002 on the three-state benchmark, and 2.0006 in the adaptive controller, against the predicted 2.</p>
+      </article>
+      <article class="titem">
+        <div>
+          <h3>Exact stationarity at finite nudge <span class="tmeta">Theorems 7, 8</span></h3>
+          <p>In the doubled state space, stationarity forces the midpoint onto the free equilibrium and gives A transpose d = beta grad C. Hence d/beta equals the adjoint exactly, at any nonzero beta. The residual form of the same statement, d/beta minus the adjoint bounded by (A inverse transpose norm) times the residual over beta, carries the exact constant 55/51.</p>
+        </div>
+        <p class="tmeta">The 1/beta factor is why smaller nudging is not automatically better, and why the budget has an interior optimum at beta* = (d / 2a) to the power one third.</p>
+      </article>
+      <article class="titem">
+        <div>
+          <h3>Certificates and non-normality <span class="tmeta">Theorems 12, 13, 14, 15</span></h3>
+          <p>A Krawczyk inclusion on a box proves existence and uniqueness of the free equilibrium, of both perturbation endpoints, and uniformly over a whole parameter interval. The algorithm is fail-closed. Separately, a family with fixed eigenvalues -1 and -0.1 amplifies the adjoint response by 15.5, so finite-time bounds must come from the semigroup or an integrator certificate, not from the spectrum.</p>
+        </div>
+        <p class="tmeta">The Lyapunov envelope stays valid, and stayed four orders of magnitude loose.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="budget">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Error budget</p>
+    <h2 style="margin-top:10px">Every term is certified, none is fitted</h2>
+    <p class="lead" style="max-width:70ch">The total bound is the sum of a contrast term, a root-enclosure term, a finite-time term and a rounding term. On the three-state benchmark the certified run accepts beta = 0.005 with T = 6 and a total bound of 4.391e-4 against a tolerance of 5e-4, while the observed gradient error is 1.076e-5: the certificate is 41 times more conservative than reality and covers it. A shorter horizon was tried first and rejected, because its solve term alone exceeded the tolerance.</p>
+    <div class="two">
+      <figure>
+        <img src="assets/fig4_error_budget.png" width="920" height="620" alt="Bar chart of the certified error budget terms compared with the observed error">
+        <figcaption class="fig-note">Certified terms and observed error, three-state benchmark</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/fig2_beta_scan.png" width="920" height="640" alt="Certified worst-branch gradient error bound against the nudging strength, with the tolerance line">
+        <figcaption class="fig-note">Worst-branch bound against nudging strength, tolerance 1e-5</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="benchmarks">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Benchmarks</p>
+    <h2 style="margin-top:10px">Two systems, both with exact or independently computed answers</h2>
+    <div class="rows">
+      <div class="row">
+        <div class="src">Multistable rational system<span>F = (x - x cubed + y/5 + theta, -y + (x - x cubed)/10)</span></div>
+        <p>Equilibria exactly (-1,0), (0,0) and (1,0); the outer two stable, the middle a saddle. Exact negative gradients 67/102 and -11/34, computed in rational arithmetic rather than estimated. Both branch tubes certified over beta in [-0.02, 0.02].</p>
+      </div>
+      <div class="row">
+        <div class="src">Three-state non-normal system<span>F = A0 (z - z*) + 0.25 tanh(K (z - z*))</span></div>
+        <p>Eigenvalues -1.8097 plus minus 0.9749i and -1.6805, with a strongly non-normal Jacobian. The implicit gradient agrees with automatic differentiation to 1.8e-16, the uncorrected vector-field rule has relative error 1.55, and the exact rational certificate bounds the gradient error at 4.391e-4.</p>
+      </div>
+      <div class="row">
+        <div class="src">Integrators and noise<span>adaptive RK4, fixed RK4, DOP853, 500 noise trials</span></div>
+        <p>The adaptive controller reaches 7.9e-7 gradient accuracy with 168 evaluations against 1136 for a fixed step and 8500 for the reference, and a bounded state-noise stress test satisfies its triangle bound in all 500 trials. These are floating-point diagnostics, not certificates, and the page does not present them as such.</p>
+      </div>
+    </div>
+    <div class="two">
+      <figure>
+        <img src="assets/fig3_nudge_order.png" width="920" height="640" alt="Relative error of the contrast signal against nudging strength, log-log, with slopes 2 and 1">
+        <figcaption class="fig-note">Centred contrast falls with slope 2, one-sided with slope 1</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/fig5_nonnormal.png" width="1360" height="580" alt="Semigroup gain and finite-time gradient error against time for increasing non-normality, with operator and Lyapunov bounds">
+        <figcaption class="fig-note">Transient amplification at fixed eigenvalues, with both bounds</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="scope">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Scope</p>
+    <h2 style="margin-top:10px">What the paper claims, and what it does not</h2>
+    <div class="panels">
+      <div class="panel">
+        <h3>Claimed</h3>
+        <ul>
+          <li>Exact gradient conditions for a broad class of smooth non-conservative equilibrium systems with regular isolated equilibria.</li>
+          <li>A finite-perturbation error budget whose constants are computed by interval evaluation.</li>
+          <li>Branch existence, uniqueness, endpoint attribution and stability certified over a parameter interval.</li>
+          <li>A fail-closed acceptance rule: a certified interval with an error bound, or a refusal.</li>
+          <li>Two benchmarks reproduced by one command, including the rejection paths.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Not claimed</h3>
+        <ul>
+          <li>No new equilibrium-propagation update rule. The antisymmetry-corrected phase and the doubled-state construction are prior work, cited and used as objects of certification.</li>
+          <li>No global convergence statement for arbitrary nonlinear dynamics.</li>
+          <li>No optimality claim for the selected nudging strength.</li>
+          <li>No transfer of the numerical certificates to systems whose coefficients are estimated from data.</li>
+          <li>No performance comparison with backpropagation, and no neural-network accuracy claim.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reproduce">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Reproduce</p>
+    <h2 style="margin-top:10px">Every number and figure on this page, in under a minute</h2>
+    <pre>python3 gep/repro/run_all.py          # nine stages, eight tests, results and logs
+python3 gep/repro/make_figures.py    # regenerate the six figures
+python3 tools/check_prose.py gep/paper/cep.tex
+xelatex -interaction=nonstopmode gep/paper/cep.tex    # build the PDF</pre>
+    <div class="cols2">
+      <div><b>Nine stages</b><span>analytic validation, bias and trade-off audits, adaptive controller, exact rational residual certificate, multibranch Krawczyk certificate, baselines, two doubled-state certificates, dense nudging scan</span></div>
+      <div><b>Eight unit tests</b><span>branch count and stability, tube contraction, selected beta, endpoint containment, wide-box rejection, 70-digit root containment, fail-closed domain checks, exact gradient values</span></div>
+      <div><b>Exact arithmetic</b><span>certificates use rational intervals over fractions.Fraction; floating-point solvers only supply candidates</span></div>
+      <div><b>Artefacts</b><span>results/ carries JSON certificates with decimal and exact fractional forms; logs/ carries the console output of every stage</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="cite">
+  <div class="wrap">
+    <p class="mono" style="margin:0">Cite</p>
+    <h2 style="margin-top:10px">Reference</h2>
+    <pre>@article{cheng2026cep,
+  title  = {Certified Equilibrium Propagation in Non-Conservative
+            Multistable Systems: Exact Gradient Conditions and
+            Finite Perturbation Guarantees},
+  author = {Cheng, Sheng},
+  year   = {2026},
+  month  = {October},
+  note   = {Hefei Jiuzhai Big Data Technology Co., Ltd.},
+  url    = {https://hf-jz.github.io/eep/gep/}
+}</pre>
+    <p class="lead" style="margin-top:26px;max-width:70ch">The paper builds on energy-based equilibrium propagation (Scellier and Bengio, 2017), its vector-field generalization (Scellier et al., 2018), the bias analysis and Jacobian homeostasis of Laborieux and Zenke (ICLR 2024), finite-nudge exactness in thermal ensembles (Litman, arXiv:2511.22024), and the non-conservative algorithms AsymEP and Dyadic EP (Scurria, Vanden Abeele, Mognetti and Massar, ICML 2026).</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0">Text and figures: CC BY 4.0. Code in <span class="sym">gep/repro</span>: MIT.</p>
+    <div class="frow">
+      <a href="../index.html">Evolutionary equilibrium propagation</a>
+      <a href="https://github.com/hf-jz/eep">GitHub</a>
+      <a href="cep.pdf">PDF</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

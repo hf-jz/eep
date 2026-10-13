@@ -1,0 +1,21 @@
+{
+  "status": "CERTIFIED_MULTIBRANCH_GEP_PASSED",
+  "beta_selected": 0.005,
+  "worst_branch_error_upper": 7.527105439394967e-06,
+  "tolerance": 1e-05,
+  "all_branch_gradient_certificates_pass": true
+}
+STAGE 5 MULTIBRANCH CERTIFICATE PASSED
+test_controller_finds_common_beta_with_certified_gradient_error (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_endpoint_boxes_certify_finite_difference_and_enclose_candidate (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_exact_implicit_gradient_values (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_exact_original_system_has_two_stable_branches_and_one_saddle (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_failure_path_rejects_unvalidated_multibranch_box (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_independent_high_precision_roots_lie_inside_certified_boxes (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_out_of_domain_requests_fail_closed (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+test_parameter_tubes_prove_unique_branch_and_stability (test_stage5.CertifiedMultiBranchGEPTests) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.023s
+
+OK

@@ -1,0 +1,22 @@
+{
+  "selected_beta": 0.04,
+  "selected_T": 7.078125000000001,
+  "adaptive_rk4_steps_both_phases": 14,
+  "adaptive_rk4_rejections_both_phases": 0,
+  "adaptive_rk4_rhs_evaluations_estimate": 168,
+  "adaptive_min_accepted_h": 0.47812500000000124,
+  "adaptive_max_accepted_h": 1.1,
+  "fixed_rk4_h": 0.05,
+  "fixed_rk4_steps_both_phases": 284,
+  "fixed_rk4_rhs_evaluations": 1136,
+  "dop853_reference_rhs_evaluations": 8500,
+  "dop853_reference_accepted_intervals": 708,
+  "adaptive_positive_state_error_vs_dop853": 1.0222531580726523e-08,
+  "adaptive_negative_state_error_vs_dop853": 1.5416528390564053e-08,
+  "fixed_positive_state_error_vs_dop853": 2.9219556304058926e-13,
+  "fixed_negative_state_error_vs_dop853": 4.608552825709724e-13,
+  "adaptive_gradient_estimate_error_vs_dop853_estimate": 7.87559448650034e-07,
+  "fixed_gradient_estimate_error_vs_dop853_estimate": 2.572270213125097e-11,
+  "adaptive_gradient_estimate_error_indicator": 1.5965027958211688e-05,
+  "warning": "DOP853 is a high-accuracy numerical reference, not an exact solution; its reported step count is solver internal output interval count, not a directly comparable RHS-call count."
+}

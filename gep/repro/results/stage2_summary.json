@@ -1,0 +1,223 @@
+{
+  "seed": 20261012,
+  "numpy_version": "2.0.2",
+  "study_1_task_restricted_exactness": {
+    "A": [
+      [
+        -1.0,
+        6.0
+      ],
+      [
+        0.0,
+        -1.0
+      ]
+    ],
+    "B": [
+      [
+        1.0
+      ],
+      [
+        0.0
+      ]
+    ],
+    "D_Ainv_minus_AinvT": [
+      [
+        0.0,
+        -6.0
+      ],
+      [
+        6.0,
+        0.0
+      ]
+    ],
+    "A_is_symmetric": false,
+    "allowed_loss_gradient_subspace_basis": [
+      [
+        1.0
+      ],
+      [
+        0.0
+      ]
+    ],
+    "restricted_operator_norm": 0.0,
+    "all_loss_gradients_operator_norm": 6.0,
+    "q_good": [
+      1.0,
+      0.0
+    ],
+    "q_good_vf_error": 0.0,
+    "q_bad": [
+      0.0,
+      1.0
+    ],
+    "q_bad_vf_error": 6.0,
+    "restricted_exactness_passes": true,
+    "global_exactness_fails": true
+  },
+  "study_2_combined_error_and_beta_opt": {
+    "beta_tradeoff": {
+      "state_error_budget_per_phase": 0.0001,
+      "spectral_norm_B_transpose": 2.942976465310898,
+      "estimated_truncation_coefficient_a": 0.12078461283854486,
+      "worst_case_noise_coefficient_d": 0.00029429764653108985,
+      "beta_opt_formula_unconstrained": 0.10680257590373976,
+      "beta_opt_formula_clipped_to_sweep": 0.10680257590373976,
+      "proxy_error_at_beta_opt": 0.004133294221241505,
+      "empirical_rms_best_beta_on_grid": 0.085,
+      "warning": "beta_opt is optimal for the stated upper-bound proxy, not universally optimal for actual training or all systems.",
+      "combined_error_decomposition_rows": 21,
+      "triangle_inequality_bound_verified": true
+    },
+    "decomposition_rows": 21
+  },
+  "study_3_nonnormal_transient": {
+    "all_systems_have_eigenvalues_minus_one_and_minus_point_one": true,
+    "lyapunov_envelope_checks_all_pass": true,
+    "lyapunov_gradient_bounds_all_pass": true,
+    "max_transient_gain_k10": 7.781679110037203,
+    "max_transient_gain_k20": 15.504802411134117,
+    "gradient_error_amplification_ratio_k10": 7.7349782605136985,
+    "gradient_error_amplification_ratio_k20": 15.481411136356375,
+    "maximum_actual_minus_direct_bound": -3.678749011784661,
+    "rows": [
+      {
+        "offdiagonal_k": 0.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": -0.1,
+        "condition_number_2": 10.0,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          -1.0,
+          -0.0
+        ],
+        "initial_finite_time_gradient_error": 1.0,
+        "max_transient_gain_0_10": 1.0,
+        "time_at_max_gain": 0.0,
+        "max_finite_time_gradient_error_0_10": 1.0,
+        "time_at_max_gradient_error": 0.0,
+        "gradient_error_amplification_ratio": 1.0,
+        "max_actual_gradient_error_minus_direct_bound": -3.678749011784661,
+        "lyapunov_lambda": 0.1,
+        "lyapunov_P_condition": 10.0,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      },
+      {
+        "offdiagonal_k": 1.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": 0.12268120235368551,
+        "condition_number_2": 20.050124999218763,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          0.7053368211354163,
+          -0.7088723218962537
+        ],
+        "initial_finite_time_gradient_error": 0.7062223501223976,
+        "max_transient_gain_0_10": 1.1251217611166306,
+        "time_at_max_gain": 1.6600000000000001,
+        "max_finite_time_gradient_error_0_10": 0.7062223501223976,
+        "time_at_max_gradient_error": 0.0,
+        "gradient_error_amplification_ratio": 1.0,
+        "max_actual_gradient_error_minus_direct_bound": -7.511033757321598,
+        "lyapunov_lambda": 0.052256221758342276,
+        "lyapunov_P_condition": 20.05012499921875,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      },
+      {
+        "offdiagonal_k": 2.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": 0.5465856099730654,
+        "condition_number_2": 50.08003196162563,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          0.4464987692873111,
+          -0.8947842471930967
+        ],
+        "initial_finite_time_gradient_error": 0.446856110782673,
+        "max_transient_gain_0_10": 1.7376901454870837,
+        "time_at_max_gain": 2.3000000000000003,
+        "max_finite_time_gradient_error_0_10": 0.678463931817363,
+        "time_at_max_gradient_error": 2.5500000000000003,
+        "gradient_error_amplification_ratio": 1.5183051444211573,
+        "max_actual_gradient_error_minus_direct_bound": -19.701247241857505,
+        "lyapunov_lambda": 0.02153483382364338,
+        "lyapunov_P_condition": 50.08003196162553,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      },
+      {
+        "offdiagonal_k": 5.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": 1.9901771591761077,
+        "condition_number_2": 260.0961552680432,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          0.19604363218672521,
+          -0.9805951734936472
+        ],
+        "initial_finite_time_gradient_error": 0.19607988057933273,
+        "max_transient_gain_0_10": 3.949075260012892,
+        "time_at_max_gain": 2.5100000000000002,
+        "max_finite_time_gradient_error_0_10": 0.7561804987766608,
+        "time_at_max_gradient_error": 2.56,
+        "gradient_error_amplification_ratio": 3.8564920406033947,
+        "max_actual_gradient_error_minus_direct_bound": -50.80354318352214,
+        "lyapunov_lambda": 0.004213007268800003,
+        "lyapunov_P_condition": 260.0961552680433,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      },
+      {
+        "offdiagonal_k": 10.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": 4.470209158989294,
+        "condition_number_2": 1010.0990099980398,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          0.09949396565251167,
+          -0.9950381654985586
+        ],
+        "initial_finite_time_gradient_error": 0.09949884221963608,
+        "max_transient_gain_0_10": 7.781679110037203,
+        "time_at_max_gain": 2.5500000000000003,
+        "max_finite_time_gradient_error_0_10": 0.7696213815151676,
+        "time_at_max_gradient_error": 2.56,
+        "gradient_error_amplification_ratio": 7.7349782605136985,
+        "max_actual_gradient_error_minus_direct_bound": -100.40418317978586,
+        "lyapunov_lambda": 0.0010879251083453566,
+        "lyapunov_P_condition": 1010.0990099980388,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      },
+      {
+        "offdiagonal_k": 20.0,
+        "eigenvalues": "[-1.0, -0.1]",
+        "logarithmic_norm_mu2": 9.460119879402043,
+        "condition_number_2": 4010.0997506296444,
+        "q_selected_as_min_right_singular_vector_of_AinvT": [
+          0.049936374753124485,
+          -0.9987524009866088
+        ],
+        "initial_finite_time_gradient_error": 0.04993699584466522,
+        "max_transient_gain_0_10": 15.504802411134117,
+        "time_at_max_gain": 2.56,
+        "max_finite_time_gradient_error_0_10": 0.7730951635857821,
+        "time_at_max_gradient_error": 2.56,
+        "gradient_error_amplification_ratio": 15.481411136356375,
+        "max_actual_gradient_error_minus_direct_bound": -200.20239758804087,
+        "lyapunov_lambda": 0.00027423900386105505,
+        "lyapunov_P_condition": 4010.099750629638,
+        "lyapunov_envelope_valid": true,
+        "lyapunov_gradient_bound_valid": true
+      }
+    ]
+  },
+  "assertions": {
+    "task_restricted_exactness_can_hold_without_symmetric_A": true,
+    "same_nonsymmetric_A_not_exact_for_all_q": true,
+    "formula_beta_opt_positive": true,
+    "finite_time_error_bound_identity_verified": true,
+    "nonnormal_lyapunov_envelope_valid": true,
+    "nonnormal_lyapunov_gradient_bound_valid": true,
+    "nonnormal_gain_exceeds_one": true,
+    "nonnormal_finite_time_gradient_response_amplifies": true,
+    "nonnormal_gradient_direct_bound_valid": true
+  },
+  "all_assertions_passed": true
+}

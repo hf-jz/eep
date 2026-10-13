@@ -9,3 +9,10 @@ __pycache__/
 *.synctex.gz
 paper/*.log
 paper/*.pdf
+
+# CEP paper: build junk stays out, gep/cep.pdf is the published copy
+gep/paper/*.log
+gep/paper/*.aux
+gep/paper/*.out
+gep/paper/*.toc
+gep/paper/cep.pdf

@@ -1,0 +1,8 @@
+{
+  "status": "CERTIFIED_MULTIBRANCH_GEP_PASSED",
+  "beta_selected": 0.005,
+  "worst_branch_error_upper": 7.527105439394967e-06,
+  "tolerance": 1e-05,
+  "all_branch_gradient_certificates_pass": true
+}
+STAGE 5 MULTIBRANCH CERTIFICATE PASSED

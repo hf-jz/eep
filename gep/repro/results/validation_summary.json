@@ -1,0 +1,158 @@
+{
+  "numpy_version": "2.0.2",
+  "torch_version": "2.8.0",
+  "J_eigenvalues": [
+    {
+      "real": -1.8097331822875473,
+      "imag": 0.9748619599562995
+    },
+    {
+      "real": -1.8097331822875473,
+      "imag": -0.9748619599562995
+    },
+    {
+      "real": -1.6805336354249083,
+      "imag": 0.0
+    }
+  ],
+  "x_equilibrium": [
+    0.27,
+    -0.385,
+    0.185
+  ],
+  "loss_at_equilibrium": 0.10124694203306933,
+  "state_gradient_q": [
+    -0.20332685633111686,
+    -0.43655591367475016,
+    -0.07360534664719587
+  ],
+  "autograd_loss_gradient": [
+    -0.05078609485537554,
+    -0.30945183751495053
+  ],
+  "central_finite_difference_gradient": [
+    -0.05078609485037466,
+    -0.3094518374949229
+  ],
+  "central_finite_difference_relative_error": 6.58262671340609e-11,
+  "autograd_descent_direction": [
+    0.05078609485537554,
+    0.30945183751495053
+  ],
+  "implicit_true_descent_direction": [
+    0.050786094855375524,
+    0.3094518375149505
+  ],
+  "dyadic_stationary_descent_direction": [
+    0.050786094855375524,
+    0.3094518375149505
+  ],
+  "vector_field_descent_direction": [
+    0.5109000147486107,
+    0.14828024875167675
+  ],
+  "implicit_relative_error": 1.824653214102882e-16,
+  "dyadic_relative_error": 1.824653214102882e-16,
+  "vf_relative_error": 1.5546511684409534,
+  "asymep_centered_error_orders": [
+    {
+      "beta": 0.4,
+      "relative_error": 0.06210567634688691
+    },
+    {
+      "beta": 0.2,
+      "relative_error": 0.015440761405170022
+    },
+    {
+      "beta": 0.1,
+      "relative_error": 0.003852653037575275
+    },
+    {
+      "beta": 0.05,
+      "relative_error": 0.0009626606725613179
+    },
+    {
+      "beta": 0.025,
+      "relative_error": 0.00024063327426610814
+    },
+    {
+      "beta": 0.0125,
+      "relative_error": 6.015631770779627e-05
+    }
+  ],
+  "empirical_log_log_order_centered_asymep": 2.002028874664088,
+  "empirical_log_log_order_one_sided_asymep": 0.9456072745364827,
+  "dyadic_finite_beta_errors": [
+    {
+      "beta": 0.4,
+      "relative_error": 1.824653214102882e-16
+    },
+    {
+      "beta": 0.2,
+      "relative_error": 1.824653214102882e-16
+    },
+    {
+      "beta": 0.1,
+      "relative_error": 1.824653214102882e-16
+    },
+    {
+      "beta": 0.05,
+      "relative_error": 1.824653214102882e-16
+    },
+    {
+      "beta": 0.025,
+      "relative_error": 1.824653214102882e-16
+    },
+    {
+      "beta": 0.0125,
+      "relative_error": 1.824653214102882e-16
+    }
+  ],
+  "nonnormal": {
+    "J": [
+      [
+        -1.0,
+        10.0
+      ],
+      [
+        0.0,
+        -1.0
+      ]
+    ],
+    "eigenvalues": [
+      {
+        "real": -1.0,
+        "imag": 0.0
+      },
+      {
+        "real": -1.0,
+        "imag": 0.0
+      }
+    ],
+    "condition_number_2": 101.99019513592786,
+    "loss_gradient_q": [
+      0.0,
+      1.0
+    ],
+    "vector_field_response_J_inverse_q": [
+      -10.0,
+      -1.0
+    ],
+    "true_adjoint_response_J_transpose_inverse_q": [
+      0.0,
+      -1.0
+    ],
+    "response_relative_error": 10.0,
+    "max_transient_gain_on_0_to_5": 3.7159551522041023,
+    "time_of_max_transient_gain": 0.98
+  },
+  "assertions": {
+    "implicit_matches_autograd": true,
+    "central_finite_difference_matches_autograd": true,
+    "dyadic_matches_autograd": true,
+    "vf_not_exact_for_nonsymmetric_example": true,
+    "asymep_centered_error_decreases_as_beta_shrinks": true,
+    "dyadic_finite_beta_exact_up_to_numerical_root_tolerance": true,
+    "stable_nonnormal_transient_gain_exceeds_one": true
+  }
+}

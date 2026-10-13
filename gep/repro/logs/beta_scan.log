@@ -1,0 +1,11 @@
+beta=0.02000 worst=1.201949e-04 accepted=False
+beta=0.01500 worst=6.759348e-05 accepted=False
+beta=0.01250 worst=4.693783e-05 accepted=False
+beta=0.01000 worst=3.004223e-05 accepted=False
+beta=0.00750 worst=1.690521e-05 accepted=False
+beta=0.00500 worst=7.527105e-06 accepted=True
+beta=0.00400 worst=4.829474e-06 accepted=True
+beta=0.00250 worst=1.916717e-06 accepted=True
+beta=0.00125 worst=5.491755e-07 accepted=True
+beta=0.00100 worst=4.002721e-07 accepted=True
+wrote /Users/sheng/math/equil_prop/gep/repro/results/beta_scan.json
