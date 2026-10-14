@@ -42,16 +42,16 @@ simulated dynamical system to a weak perturbation of its stationary state. The c
 guarantee rests on an energy function, which forces the state Jacobian to be symmetric. Recent
 work has removed the symmetry requirement, and finite-nudge exactness has been established for
 contrastive free-energy objectives in thermal ensembles. What remains open is computational:
-a finite-precision procedure returns two numerical states, and the practitioner has no way to
-decide whether the gradient read out of them meets a stated tolerance, or whether the numerical
-states belong to the intended equilibrium branch of a multistable system. We address that
+a finite-precision procedure returns two numerical states, and no criterion determines whether
+the gradient read from them meets a stated tolerance, or whether the states belong to the
+intended equilibrium branch of a multistable system. We address that
 question analytically and numerically. First, we isolate the exact gradient conditions for
 general smooth non-conservative equilibrium systems and show how the equilibrium sensitivity
 $A^{-1}q$ differs from the adjoint quantity $A^{-\top}q$ the parameter gradient requires, a
 distinction that vanishes in the conservative case and that explains the residual bias of
 standard vector-field EP. Second, we derive a finite-perturbation error budget with computable
 constants: a second-order contrast bias, a solver term that grows as $1/\betamax$, a finite-time
-integration term, and a rounding term. Third, we turn the budget into a fail-closed
+integration term, and a rounding term. Third, we convert the budget into a fail-closed
 certification algorithm built on interval Krawczyk operators over exact rational arithmetic,
 which certifies branch existence and uniqueness uniformly over a parameter interval, encloses
 the centred finite difference, and accepts or rejects an update against a prescribed tolerance.
@@ -88,8 +88,8 @@ backward pass is unavailable \cite{kendall2020,yi2023,hoier2023}.
 
 The classical derivation assumes an energy function $E$ with $\dot z = -\grad_z E$. Then the
 state Jacobian at a stationary point is symmetric, the state response and the adjoint response
-coincide, and the two-phase contrast reproduces the gradient. Symmetric coupling is exactly what
-hardware does not provide: memristive crossbars, optical and mechanical networks, and
+coincide, and the two-phase contrast reproduces the gradient. Symmetric coupling is rarely
+available in hardware: memristive crossbars, optical and mechanical networks, and
 feedforward architectures all realize non-reciprocal interactions. Two lines of work address
 this. The vector-field generalization replaces the energy by an arbitrary force field and keeps
 the two-phase rule, at the cost of a bias that grows with the antisymmetric part of the Jacobian
@@ -104,7 +104,7 @@ rather than of contrastive learning itself \cite{litman2026}. Quantum and therma
 same response identities are developed in \cite{massar2025}.
 
 These results settle what the algorithm computes in exact arithmetic, to first order, or in the
-thermodynamic limit. They do not settle what a practitioner holds after a run. A run returns
+thermodynamic limit. They do not address the status of the numerical output of a run, which is
 floating-point states obtained from a root finder or an ODE integrator; the reported gradient is
 a quotient by a small number; and in a multistable system the two states may belong to different
 equilibrium branches. A small residual at the returned states is not a correctness argument:
@@ -343,10 +343,9 @@ $A = A^{\top}$ then $s = \lambda$ and the two notions coincide.
 \end{proposition}
 
 Proposition~\ref{prop:sens} is the reason non-conservative systems need a corrected learning
-phase. It also explains a failure mode of the numerical practice: a two-phase run whose results
-look clean, in the sense of small residuals, still yields the wrong direction whenever $A$ is not
-symmetric, and the discrepancy is not small unless $q$ happens to lie in a subspace on which the
-two responses agree. Table~\ref{tab:levels} records this on the benchmark of
+phase. It also identifies a failure mode of the numerical practice: a two-phase run with small
+residuals may still yield an incorrect direction whenever $A$ is not symmetric, and the
+discrepancy is not small unless $q$ happens to lie in a subspace on which the two responses agree. Table~\ref{tab:levels} records this on the benchmark of
 Section~\ref{sec:multistable}: the two quantities are $-0.3235294118$ and $-0.3627450980$,
 a relative difference of $12\%$.
 
@@ -489,7 +488,7 @@ finite-nudge exactness obtained for free-energy contrasts in thermal ensembles
 \cite{litman2026}, where the residual is a zero-temperature effect rather than a contrastive one.
 \end{theorem}
 
-Theorem~\ref{thm:secondorder} replaces the empirical statement ``the error looks quadratic'' by a
+Theorem~\ref{thm:secondorder} replaces the empirical observation that the error is approximately quadratic with a
 bound whose constant is computed, not fitted. In the implementation of
 Section~\ref{sec:nonnormal} the constant is obtained by differentiating the stationarity equation
 implicitly: with a certified contraction rate $\alpha$ on a neighbourhood of the branch, one
@@ -565,7 +564,7 @@ z^{-\beta})/(2\beta)$ together with $\diam X^\pm = 2 r^\pm$ for boxes of radius 
 
 Theorem~\ref{thm:budget} is the analytic counterpart of Algorithm~\ref{alg:certified}. Four
 remarks are in order. First, the budget is stated for $\betamax$, the largest perturbation
-strength in the certified domain, so that a single tube certificate serves every candidate below
+strength in the certified domain, so that a single tube certificate covers every candidate below
 it. Second, a bound of the form \eqref{eq:budget} is only meaningful when each term is finite on
 the certified domain: the contraction certificate below is what makes that true. Third, the
 verdict is a comparison of the bound with a tolerance, not a comparison of the observed error
@@ -580,7 +579,7 @@ $E_{\mathrm{fp}}$ is absent for a different reason: candidate states are convert
 rationals and every subsequent operation is exact, so no rounding enters those certificates at all
 and $\kappa(A)u$ overstates a contribution that is zero in that arithmetic.
 
-Two routes to a gradient bound are available, and the two benchmarks exercise different ones. When
+Two routes to a gradient bound are available, and the two benchmarks exercise different routes. When
 the exact rational gradient $d^\star$ of Theorem~\ref{thm:implicit} has a closed form, the verdict
 uses the direct interval error
 \begin{equation}
@@ -597,7 +596,7 @@ rather than a model-independent guarantee, because it presupposes the closed-for
 precisely why it is used only on the rational benchmark. The truth-free route is
 \eqref{eq:budget}, whose terms are computed by interval evaluation alone: it is the route the
 three-state benchmark of Section~\ref{sec:nonnormal} takes, and the route available to a user who
-has no closed-form gradient, at the price of constants that may be conservative by orders of
+has no closed-form gradient, at the cost of constants that may be conservative by orders of
 magnitude.
 
 \subsection{Branch-existence certificates and the fail-closed rule}
@@ -637,7 +636,7 @@ each $\beta$, an endpoint verified to lie inside the tube box lies on the same b
 equilibrium, and the two endpoints of a centred contrast belong to one branch rather than to two.
 Without that containment check the two certified endpoints could sit on two different branches and
 their difference quotient would be meaningless, which is the failure mode the final rejection rule
-of Algorithm~\ref{alg:certified} is there to catch.
+of Algorithm~\ref{alg:certified} detects.
 
 \begin{theorem}[Local uniqueness is all that is claimed]\label{thm:local}
 The conclusion of Theorem~\ref{thm:krawczyk} and Corollary~\ref{cor:tube} is local: it asserts
@@ -838,7 +837,7 @@ $(1,0)$  & $-11/34 = -0.3235294118$ & $[-0.3235286635,\ -0.3235286235]$ & $7.882
 \end{tabular}
 \end{table}
 
-Three properties of Table~\ref{tab:branch} deserve emphasis. The exact gradient lies outside both
+Three properties of Table~\ref{tab:branch} should be recorded. The exact gradient lies outside both
 difference intervals, because the finite-nudge estimator is biased: the certificate is an
 enclosure of the estimator, and the bound then measures the estimator against the truth. The
 interval enclosure is tiny (width $4\times10^{-8}$) because the endpoint boxes were certified at
@@ -930,7 +929,7 @@ $E_z = \norm{B}(r^+ + r^-)/(2\beta) = 3.24 \times (1.0999\times10^{-7} + 1.1688\
 the enclosure term of \eqref{eq:budget} in its radius form
 (Table~\ref{tab:budget}). The total certified bound is $4.391\times10^{-4}$ at tolerance
 $5\times10^{-4}$, while the observed gradient error at the same settings is
-$1.076\times10^{-5}$: the certificate is $41$ times more conservative than reality, and it covers
+$1.076\times10^{-5}$: the certificate is $41$ times more conservative than the observed error, and it bounds
 it.
 
 \begin{table}[t]
@@ -969,7 +968,7 @@ uncertainty budget of $5\times10^{-6}$. Its realised direction differs from the 
 $1.938\times10^{-4}$ in absolute terms ($6.18\times10^{-4}$ relative), and the adjacent-scale
 comparison gives an observed order of $2.0006$, consistent with Theorem~\ref{thm:secondorder}. The
 same run compares integrators at the selected settings (Table~\ref{tab:integrator}) and performs a
-$500$-trial bounded state-noise stress test, in which the triangle inequality combining the clean
+$500$-trial bounded state-noise stress test, in which the triangle inequality combining the noise-free
 error and the noise-induced term holds in every trial.
 
 \begin{table}[t]
@@ -1008,7 +1007,7 @@ tier of evidence.}
 \includegraphics[width=0.58\textwidth]{../assets/fig4_error_budget.png}
 \caption{The certified budget of Table~\ref{tab:budget} at $T = 6.0$, with the observed error for
 comparison. The certificate is dominated by the contrast bias and is $41$ times larger than the
-observed error, which is the intended direction: a bound that were tighter than reality would be
+observed error, which is the intended direction: a bound tighter than the observed error would be
 an error, not a certificate.}
 \label{fig:budget}
 \end{figure}
@@ -1024,7 +1023,7 @@ $1/\abs{\beta}$: the same amplification mechanism as in the budget. Second, and 
 the float64 linear solve that produces $\widehat d$ is re-evaluated in exact rational arithmetic:
 each returned coordinate is read as its exact binary rational value, the residual
 $r_d = A^{\top}\widehat d - \beta q$ is recomputed with rational arithmetic, and the resulting
-bound covers the observed error in all four cases (Table~\ref{tab:dyadic}). This upgrades the
+bound covers the observed error in all four cases (Table~\ref{tab:dyadic}). This replaces the
 residual from an assumption to a measurement, while remaining a statement about a linear
 subproblem with an exactly known midpoint.
 
@@ -1049,7 +1048,7 @@ $0.0001$ & $8.809\times10^{-21}$ & $9.5001\times10^{-17}$ & $4.3846\times10^{-17
 \end{tabular}
 \end{table}
 
-\subsection{Non-normality inflates finite-time bounds and nothing else}
+\subsection{Non-normality inflates finite-time bounds but not the error}
 \label{sec:nonnormal}
 
 The family $A_K = \begin{pmatrix} -1 & K \\ 0 & -0.1 \end{pmatrix}$ has fixed eigenvalues
@@ -1081,7 +1080,7 @@ $20$ & $4010.10$ & $9.460$ & $15.505$ & $2.56$ & $15.481$ \\
 \end{tabular}
 \end{table}
 
-The smallest instance is a two-dimensional counterexample sharp enough to quote in full:
+The smallest instance is a two-dimensional counterexample, which we state explicitly:
 $A = \begin{pmatrix} -1 & 10 \\ 0 & -1 \end{pmatrix}$ with $q = (0,1)^{\top}$ gives
 $A^{-1}q = (-10,-1)$ and $A^{-\top}q = (0,-1)$, a relative gap of $10$, while
 $\kappa_2(A) = 101.99$ and the semigroup norm peaks at $3.716$ at $t = 0.98$. This instance
@@ -1089,7 +1088,7 @@ belongs to the equal-eigenvalue family of Theorem~\ref{thm:nonnormal} and is not
 of Table~\ref{tab:nonnormal}, which has eigenvalues $-1$ and $-0.1$ and hence the larger condition
 number $1010.10$. A finite-time
 argument based on the eigenvalues would predict monotone decay throughout and would therefore be
-wrong by an order of magnitude in both the response and its error.
+in error by an order of magnitude in both the response and its bound.
 
 \begin{figure}[t]
 \centering
@@ -1106,8 +1105,8 @@ is unusable when sharpness matters.}
 
 \subsection{Reproducibility}
 
-The package runs in under a minute on a laptop and consists of a linear-conservative-free design:
-no stage depends on a precomputed artefact. Running the driver executes, in order, the analytic
+The package runs in under a minute on a laptop, with no dependence on precomputed artefacts.
+Running the driver executes, in order, the analytic
 validation, the bias and trade-off audits, the adaptive controller, the exact rational residual
 certificate, the multibranch Krawczyk certificate, the baseline comparison, the two doubled-state
 certificate stages and the dense nudging scan, and then the unit test suite; it writes logs and
@@ -1153,9 +1152,9 @@ asymmetry bias, are from \cite{laborieux2024,scellier2018}. This paper does not 
 update rules. It contributes the conditions under which their computed output carries a guarantee,
 and the numerical machinery that produces one.
 
-\paragraph{Why certification is more than bookkeeping.}
-Two failure modes are invisible to residual-based reasoning. First, the sensitivity-adjoint gap of
-Proposition~\ref{prop:sens}: on the benchmark the uncorrected rule is wrong by $12\%$ relative
+\paragraph{The two failure modes that certificates detect.}
+Two failure modes escape residual-based reasoning. First, the sensitivity-adjoint gap of
+Proposition~\ref{prop:sens}: on the benchmark the uncorrected rule is in error by $12\%$ relative
 while its residual is $10^{-17}$, so a small residual certifies nothing about the direction.
 Second, non-normality: Table~\ref{tab:nonnormal} shows that eigenvalues fixed at $-1$ and $-0.1$
 permit a $15.5$-fold transient amplification of the adjoint response, so a finite-time error bound
@@ -1171,7 +1170,7 @@ number of operations. At the scale of the benchmarks ($n = 2$ and $n = 3$) the e
 pipeline runs in well under a second, including both branches, both endpoints, the dense nudging
 grid and the wide-box rejection. The practical question for larger systems is not the asymptotic
 cost of interval arithmetic but whether the boxes stay tight enough for the inclusion to succeed;
-that is an empirical question in a dimension we have not probed, and it is the main direction for
+that is an empirical question in a dimension not examined here, and it is the main direction for
 future work.
 
 \paragraph{Limitations.}
@@ -1191,8 +1190,8 @@ tests over exact rational arithmetic, but they have not been formalised in a pro
 \section{Conclusion}
 
 Equilibrium propagation beyond conservative systems is now supported by exact-gradient algorithms
-and by thermal-ensemble exactness results. What a practitioner holds after a run, however, is a
-pair of numerical states and a quotient by a small number. This paper has argued that the missing
+and by thermal-ensemble exactness results. The output of a run, however, is a pair of numerical
+states and a quotient by a small number. This paper has argued that the missing
 object is a certificate, and has supplied one: exact gradient conditions for smooth
 non-conservative systems with regular equilibria, a finite-perturbation error budget whose
 constants are computed rather than fitted, a branch-aware interval certificate that establishes
@@ -1201,10 +1200,9 @@ returns an interval or refuses. On an exactly solvable non-conservative system w
 branches and a saddle, the pipeline certifies both branches, both perturbation endpoints and the
 whole nudging tube in rational arithmetic, accepts $\beta = 0.005$ with a worst-branch bound of
 $7.53\times10^{-6}$ at tolerance $10^{-5}$, and rejects both larger nudging strengths and a box
-that spans all three equilibria. The broader lesson is the one the two benchmarks keep
-illustrating: in non-conservative and non-normal systems, neither a small residual nor a stable
-spectrum implies that an EP update is what it appears to be, and only a certificate separates the
-two.
+that spans all three equilibria. The two benchmarks support one general observation: in
+non-conservative and non-normal systems, neither a small residual nor a stable spectrum implies
+that an EP update is what it appears to be, and only a certificate distinguishes the two cases.
 
 \appendix
 
