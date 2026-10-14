@@ -58,14 +58,14 @@ the centred finite difference, and accepts or rejects an update against a prescr
 On an exactly solvable two-dimensional non-conservative system with two stable equilibria and a
 saddle, both stable branches and both perturbation endpoints are certified with a preconditioned
 contraction factor of $2249/13600$; the controller accepts $\betamax = 0.005$ with a worst-branch
-gradient error bound of $7.53\times10^{-6}$ at tolerance $10^{-5}$ and rejects every larger
+gradient error bound of $7.53\times10^{-6}$ at tolerance $10^{-5}$ and rejects every larger tested
 candidate, including a deliberately broad box that spans all three equilibria. On a three-state
 non-normal benchmark the certified residual run bounds the gradient error by
 $4.39\times10^{-4}$ at tolerance $5\times10^{-4}$ while the observed error is
 $1.08\times10^{-5}$. We also quantify why finite-time guarantees must not be read off the
 spectrum: systems with fixed eigenvalues can amplify the adjoint response by a factor of $15.5$,
-and the corresponding Lyapunov envelope is valid but looser than the operator bound by four
-orders of magnitude. All numbers in this paper are produced by the accompanying package in
+and the corresponding Lyapunov envelope, while valid, exceeds the observed error by four orders of
+magnitude. All numbers in this paper are produced by the accompanying package in
 under a minute.
 
 \vspace{6pt}
@@ -166,7 +166,9 @@ observed. The certified statements in Section~\ref{sec:results} are statements a
 explicitly defined benchmarks; their conclusions are intervals that contain the exact rational
 answer, not performance claims about neural networks. We do not propose a new EP update rule: the
 antisymmetry-corrected phase and the doubled-state construction are prior work
-\cite{scurria2026,hoier2023}, and we use them as the objects of certification.
+\cite{scurria2026,hoier2023}, and we use them as the objects of certification. The unit of
+certification is one gradient estimate, at one parameter point, on one certified branch: nothing
+here certifies the training trajectory that later consumes the estimate.
 
 \section{Related work}
 
@@ -536,8 +538,10 @@ same run that produces the curves.}
 Let Assumption~\ref{ass:regular} hold on a neighbourhood $\Omega$ of the branch with
 $\sigma_{\min}(A(z)) \ge \alpha > 0$ for $z \in \Omega$, let $\abs{\beta} \le \betamax$ be such
 that the perturbation endpoints lie in $\Omega$, and let $(\widehat z^{+\beta}, \widehat z^{-\beta})$
-be computed states with certified enclosures $X^+ \ni z^{+\beta}$, $X^- \ni z^{-\beta}$ and,
-when the states are obtained by integrating an auxiliary dynamics for time $T$, a certified
+be computed states with certified boxes $X^+$, $X^-$ that contain both the exact roots
+$z^{+\beta}, z^{-\beta}$ and the reported candidates $\widehat z^{+\beta}, \widehat z^{-\beta}$,
+and, when the states are obtained by
+integrating an auxiliary dynamics for time $T$, a certified
 finite-time error $\delta_t$. Then
 \begin{equation}
 \boxed{\
@@ -545,7 +549,7 @@ finite-time error $\delta_t$. Then
 \;\le\;
 \underbrace{\frac{\norm{B}}{6} M_3 \beta^2}_{E_\beta:\ \text{contrast bias}}
 \;+\;
-\underbrace{\frac{\norm{B}}{2\betamax}\bigl(\diam X^+ + \diam X^-\bigr)}_{E_z:\ \text{root enclosure}}
+\underbrace{\frac{\norm{B}}{4\betamax}\bigl(\diam X^+ + \diam X^-\bigr)}_{E_z:\ \text{root enclosure}}
 \;+\;
 \underbrace{\frac{\norm{B}}{\betamax}\delta_t}_{E_t:\ \text{finite time}}
 \;+\;
@@ -554,20 +558,31 @@ finite-time error $\delta_t$. Then
 \label{eq:budget}
 \end{equation}
 with $u$ the unit roundoff and $\kappa(A) = \norm{A}\norm{A^{-1}}$. Each term is either certified
-by interval evaluation or explicitly declared as a modelling assumption; none is fitted.
+by interval evaluation or explicitly declared as a modelling assumption; none is fitted. The
+root-enclosure term follows from the estimator $\widehat g_\beta = B^{\top}(z^{+\beta} -
+z^{-\beta})/(2\beta)$ together with $\diam X^\pm = 2 r^\pm$ for boxes of radius $r^\pm$.
 \end{theorem}
 
-Theorem~\ref{thm:budget} is the analytic counterpart of Algorithm~\ref{alg:certified}. Three
+Theorem~\ref{thm:budget} is the analytic counterpart of Algorithm~\ref{alg:certified}. Four
 remarks are in order. First, the budget is stated for $\betamax$, the largest perturbation
 strength in the certified domain, so that a single tube certificate serves every candidate below
 it. Second, a bound of the form \eqref{eq:budget} is only meaningful when each term is finite on
 the certified domain: the contraction certificate below is what makes that true. Third, the
 verdict is a comparison of the bound with a tolerance, not a comparison of the observed error
 with the tolerance; the latter would be circular, since the observed error is what the certificate
-is supposed to bound.
+is supposed to bound. Fourth, the four terms are alternatives rather than a checklist that a run
+must populate. On the benchmarks of Section~\ref{sec:results} the finite-time term is realised in
+a stronger form than the statement requires: instead of bounding an integrator's truncation error,
+the endpoint certificate bounds the residual of the returned state and converts it into a distance
+to the equilibrium through the certified contraction rate, so $E_t$ is replaced by an
+$E_z$ computed from that distance, not by an error estimate for the integration. The rounding term
+$E_{\mathrm{fp}}$ is absent for a different reason: candidate states are converted to exact binary
+rationals and every subsequent operation is exact, so no rounding enters those certificates at all
+and $\kappa(A)u$ overstates a contribution that is zero in that arithmetic.
 
-When the exact rational gradient $d^\star$ of Theorem~\ref{thm:implicit} is available, as it is on
-the benchmarks, the verdict uses the direct interval error
+Two routes to a gradient bound are available, and the two benchmarks exercise different ones. When
+the exact rational gradient $d^\star$ of Theorem~\ref{thm:implicit} has a closed form, the verdict
+uses the direct interval error
 \begin{equation}
 D(\beta) = [\underline d,\ \overline d] \supseteq \widehat g_\beta,
 \qquad
@@ -577,7 +592,13 @@ E(\beta) = \max\bigl\{\abs{\underline d - d^\star},\ \abs{\overline d - d^\star}
 so that $\abs{\widehat g_\beta - d^\star} \le E(\beta)$ holds by construction; this is the
 quantity reported in Tables~\ref{tab:scan} and~\ref{tab:branch}. It covers both the contrast bias
 and the enclosure radius of the endpoints, and it requires no Taylor remainder estimate, since the
-truth is known exactly.
+truth is known exactly. It is nevertheless a statement about the estimator at one parameter point
+rather than a model-independent guarantee, because it presupposes the closed-form truth; that is
+precisely why it is used only on the rational benchmark. The truth-free route is
+\eqref{eq:budget}, whose terms are computed by interval evaluation alone: it is the route the
+three-state benchmark of Section~\ref{sec:nonnormal} takes, and the route available to a user who
+has no closed-form gradient, at the price of constants that may be conservative by orders of
+magnitude.
 
 \subsection{Branch-existence certificates and the fail-closed rule}
 
@@ -598,9 +619,11 @@ Let $g(z,\beta)$ depend on a parameter $\beta \in \mathcal{B}$ and suppose that 
 box $X$ and preconditioner $P$ the inclusion $K(X,\mathcal{B}) \subset \operatorname{int}(X)$
 holds with an interval Jacobian evaluated over both $X$ and $\mathcal{B}$, and that
 $\sup_{\beta \in \mathcal{B}}\norm{I - P D_z g(X,\beta)}_{\infty} = c < 1$. Then for every fixed
-$\beta \in \mathcal{B}$ there is exactly one root in $X$. If in addition the Jacobian's trace and
-determinant are sign-definite on $X \times \mathcal{B}$ (negative trace, positive determinant in
-the two-dimensional case), the root is locally asymptotically stable throughout the tube.
+$\beta \in \mathcal{B}$ there is exactly one root in $X$. If in addition the trace and determinant
+of the learning-phase Jacobian $D_z g$ are sign-definite on $X \times \mathcal{B}$ (negative trace,
+positive determinant in the two-dimensional case), that root is locally asymptotically stable as a
+state of the learning-phase dynamics. Stability of the free equilibrium is a separate property,
+governed by $A = D_z F$ and certified separately.
 \end{corollary}
 
 Corollary~\ref{cor:tube} is the reason a certification run can cover a continuum of nudging
@@ -609,6 +632,12 @@ candidate strengths without re-certifying existence. Branch identity is then a c
 geometry rather than of the solver's initial guess: a box whose solution set is certified unique
 cannot contain two distinct equilibria, so a deliberately wide box spanning several equilibria
 must be rejected by the inclusion test. That rejection is itself part of the acceptance suite.
+Containment carries the same argument one level further. Since the box holds exactly one root for
+each $\beta$, an endpoint verified to lie inside the tube box lies on the same branch as the free
+equilibrium, and the two endpoints of a centred contrast belong to one branch rather than to two.
+Without that containment check the two certified endpoints could sit on two different branches and
+their difference quotient would be meaningless, which is the failure mode the final rejection rule
+of Algorithm~\ref{alg:certified} is there to catch.
 
 \begin{theorem}[Local uniqueness is all that is claimed]\label{thm:local}
 The conclusion of Theorem~\ref{thm:krawczyk} and Corollary~\ref{cor:tube} is local: it asserts
@@ -627,14 +656,19 @@ $-1$, so the spectral abscissa is $-1$ for every $K$, yet
 \norm{e^{A_K^{\top} t}}_2 = e^{-t}\,\sqrt{1 + \tfrac{K^2 t^2}{2} + \tfrac{K t}{2}\sqrt{K^2t^2 + 4}}
 \label{eq:gain}
 \end{equation}
-which grows before it decays. The Lyapunov envelope
+which grows before it decays. Two families appear below and should not be conflated. The closed
+form \eqref{eq:gain} is for the equal-eigenvalue case, whose two eigenvalues are both $-1$; it is
+the family used for the counterexample of Section~\ref{sec:nonnormal}. The scanned family
+$A_K = \begin{pmatrix} -1 & K \\ 0 & -0.1 \end{pmatrix}$, with eigenvalues $-1$ and $-0.1$, has no
+equally compact form and is evaluated numerically; the same phenomenon appears there, with the
+semigroup norm reaching $15.5$ at $K = 20$. In both families the Lyapunov envelope
 $\norm{e^{A^{\top}t}}_2 \le \sqrt{\kappa(P)}\,e^{-\lambda t}$ with
 $A P + P A^{\top} = -I$ and $\lambda = 1/(2\norm{P})$ remains valid, but it is not tight: on the
-scanned family the operator bound exceeds the directional adjoint error by three orders of
-magnitude while never being violated. Therefore the finite-time term $E_t$ of
-Theorem~\ref{thm:budget} must be derived from a semigroup bound or a certified integrator
-estimate, not from the spectrum, and a stability certificate for the equilibrium does not by
-itself justify a finite-time error bound.
+scanned family it stays above the directional adjoint error by four orders of magnitude while
+never being violated, and the direct operator-norm bound is itself three orders above the error.
+Therefore the finite-time term $E_t$ of Theorem~\ref{thm:budget} must be derived from a semigroup
+bound or a certified integrator estimate, not from the spectrum, and a stability certificate for
+the equilibrium does not by itself justify a finite-time error bound.
 \end{theorem}
 
 \begin{algorithm}[t]
@@ -724,7 +758,7 @@ $\beta \in [-0.02,0.02]$ on both tubes.}
 For each stable branch we take the box $X_s = [s-0.05, s+0.05] \times [-0.04, 0.04]$ and the
 parameter interval $\mathcal{B} = [-0.02,0.02]$, and evaluate the parametric Krawczyk operator
 \eqref{eq:krawczyk} in exact rational arithmetic with the preconditioner
-$P = \bigl(D_z g(z_s,0)\bigr)^{-1} = A^{\top}(z_s)^{-1}$. Both tubes pass the strict inclusion
+$P = \bigl(D_z g(z_s,0)\bigr)^{-1} = \bigl(A_s^{\top}\bigr)^{-1} = A_s^{-\top}$. Both tubes pass the strict inclusion
 test with the same certified contraction factor
 \begin{equation}
 \sup_{\beta \in \mathcal{B}} \norm{I - P\,D_z g(X_s,\beta)}_{\infty} = \frac{2249}{13600}
@@ -737,9 +771,12 @@ $\beta$ in the interval. On the same tube the learning Jacobian satisfies
 \qquad
 \det D_z g \in \Bigl[\tfrac{4219}{2500}, \tfrac{24199}{10000}\Bigr] = [1.6876,2.4199],
 \end{equation}
-so the Hurwitz criterion holds throughout the tube: every root in it is locally asymptotically
-stable. Both facts are statements about a continuum of nudging strengths, not about the one value
-finally selected.
+so the Hurwitz criterion holds throughout the tube: every learning-phase root in it is locally
+asymptotically stable as a state of the augmented dynamics, which is what the certificate
+establishes. Stability of the free equilibria is the separate statement of
+Section~\ref{sec:multistable}, $\operatorname{tr}A = -3$ and $\det A = 51/25 > 0$, and it is a
+property of $A = D_z F$ rather than of $D_z g$. Both facts are statements about a continuum of
+nudging strengths, not about the one value finally selected.
 
 \paragraph{Nudging selection.}
 The controller evaluates candidates in descending order and accepts the first one whose entire
@@ -878,7 +915,9 @@ x_1 \le 0.7714, \qquad x_2 \le 3.6779, \qquad x_3 \le 27.0817,
 The two perturbation endpoints are integrated with a high-accuracy solver and then re-evaluated in
 exact rational arithmetic: their residual infinities are bounded by $7.04\times10^{-8}$ and
 $7.48\times10^{-8}$, which yields certified distances to the equilibrium of
-$1.10\times10^{-7}$ and $1.17\times10^{-7}$ and a solve contribution $E_z = 7.351\times10^{-5}$
+$1.10\times10^{-7}$ and $1.17\times10^{-7}$ and a solve contribution
+$E_z = \norm{B}(r^+ + r^-)/(2\beta) = 3.24 \times (1.0999\times10^{-7} + 1.1688\times10^{-7})/(2\times 0.005) = 7.351\times10^{-5}$,
+the enclosure term of \eqref{eq:budget} in its radius form
 (Table~\ref{tab:budget}). The total certified bound is $4.391\times10^{-4}$ at tolerance
 $5\times10^{-4}$, while the observed gradient error at the same settings is
 $1.076\times10^{-5}$: the certificate is $41$ times more conservative than reality, and it covers
@@ -1035,7 +1074,10 @@ $20$ & $4010.10$ & $9.460$ & $15.505$ & $2.56$ & $15.481$ \\
 The smallest instance is a two-dimensional counterexample sharp enough to quote in full:
 $A = \begin{pmatrix} -1 & 10 \\ 0 & -1 \end{pmatrix}$ with $q = (0,1)^{\top}$ gives
 $A^{-1}q = (-10,-1)$ and $A^{-\top}q = (0,-1)$, a relative gap of $10$, while
-$\kappa_2(A) = 101.99$ and the semigroup norm peaks at $3.716$ at $t = 0.98$. A finite-time
+$\kappa_2(A) = 101.99$ and the semigroup norm peaks at $3.716$ at $t = 0.98$. This instance
+belongs to the equal-eigenvalue family of Theorem~\ref{thm:nonnormal} and is not the $K = 10$ row
+of Table~\ref{tab:nonnormal}, which has eigenvalues $-1$ and $-0.1$ and hence the larger condition
+number $1010.10$. A finite-time
 argument based on the eigenvalues would predict monotone decay throughout and would therefore be
 wrong by an order of magnitude in both the response and its error.
 
@@ -1224,11 +1266,13 @@ yields \eqref{eq:secondorder-grad}.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:krawczyk}]
-Let $\psi(z) = z - P\,g(z)$. Then $\psi(z) = K(X)$-form plus a constant independent of $z$ for
-$z \in X$, and $D\psi(X) = I - P\,Dg(X)$, so $\psi$ maps $X$ into itself and is a contraction
-with factor $c = \norm{I-PDg(X)}_{\infty} < 1$ whenever
-$K(X) \subset \operatorname{int}(X)$. By the Banach fixed-point theorem $\psi$ has exactly one
-fixed point in $X$, and fixed points of $\psi$ coincide with zeros of $g$ because $P$ is
+Let $\psi(z) = z - P\,g(z)$. For $z \in X$ the mean value theorem gives
+$\psi(z) = x - P\,g(x) + \bigl(I - P\,Dg(\xi)\bigr)(z - x)$ for some $\xi$ on the segment from
+$x$ to $z$. Since $Dg(\xi)$ lies in the interval enclosure $Dg(X)$, the right-hand side lies in
+$K(X)$, so $\psi$ maps $X$ into $\operatorname{int}(X)$ whenever the inclusion holds. In addition
+$\norm{D\psi(X)}_{\infty} = \norm{I - P\,Dg(X)}_{\infty} < 1$, so $\psi$ is a contraction on $X$
+and has exactly one fixed point there by the Banach fixed-point theorem; fixed points of $\psi$
+coincide with zeros of $g$ because $P$ is
 nonsingular. The parametric statement of Corollary~\ref{cor:tube} follows by applying the argument
 for each fixed $\beta$ with the same box, which the interval evaluation over $\mathcal{B}$ covers
 uniformly.
