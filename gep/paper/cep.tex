@@ -644,7 +644,10 @@ The conclusion of Theorem~\ref{thm:krawczyk} and Corollary~\ref{cor:tube} is loc
 existence and uniqueness in the certified box, and no global statement about the number of
 equilibria or about convergence of trajectories. Consequently a certificate can be produced for
 one branch while another branch, equally stable, is not certified in the same run; and the
-presence of an uncertified branch is not evidence against the certified one.
+presence of an uncertified branch is not evidence against the certified one. The framework is
+sound but not complete: a failed inclusion says that the box was too wide for the test, not that
+no root is there, so a rejection is a statement about the certificate and never a claim about the
+system.
 \end{theorem}
 
 \subsection{Non-normality: finite-time bounds are not spectral bounds}
@@ -904,7 +907,14 @@ doubled-state signal is exact in algebra and limited only by the linear solve
 The exact rational implementation certifies the following constants on the certified domain
 $\abs{\beta} \le 0.32$: one-sided contraction rate $\alpha = 0.64$; parameter Jacobian bound
 $\norm{B}_F \le 3.24$; $\norm{q(x_0)} \le 0.488$; loss-gradient Lipschitz constant $L_q \le 1.5$;
-force derivative bounds $M_2 \le 0.066$, $M_3 \le 0.080$. From these, the derivative bounds of
+force derivative bounds $M_2 \le 0.066$, $M_3 \le 0.080$. None of these is fitted or assumed: each
+is an assertion in exact rational arithmetic that the code re-evaluates and that raises if
+violated. The contraction rate comes from a Gershgorin row-sum bound on the Jacobian of the
+learning field, computed over an exact interval enclosure of the state and compared with the
+claimed $-0.64$; the parameter-Jacobian bound from an exact Frobenius sum, checked against
+$3.24$; the loss-gradient bound from an interval evaluation of $q$ on the certified box; and the
+derivative bounds $M_2, M_3$ from the product structure of the force, with the row norms of $K$
+themselves bounded by rational constants. From these, the derivative bounds of
 Theorem~\ref{thm:secondorder} are computed by implicit differentiation and evaluated at
 $\beta = 0.005$ as
 \begin{equation}
