@@ -13,6 +13,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import json
+
 HERE = Path(__file__).resolve().parent
 RES = HERE / "results"
 LOGS = HERE / "logs"
@@ -49,6 +51,13 @@ def main() -> int:
                               capture_output=True, text=True)
         log = LOGS / f"{name}.log"
         log.write_text(proc.stdout + proc.stderr, encoding="utf-8")
+        # Stages that print a JSON document also deposit it under results/.
+        try:
+            json.loads(proc.stdout)
+        except (ValueError, TypeError):
+            pass
+        else:
+            (RES / f"{name}.json").write_text(proc.stdout, encoding="utf-8")
         if proc.returncode != 0:
             failures.append(name)
             print(f"  FAILED (exit {proc.returncode}); see {log}")

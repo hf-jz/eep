@@ -6,6 +6,15 @@
   "all_branch_gradient_certificates_pass": true
 }
 STAGE 5 MULTIBRANCH CERTIFICATE PASSED
+test_certified_budget (test_paper_numbers.PaperNumbers) ... ok
+test_dyadic_certificates (test_paper_numbers.PaperNumbers) ... ok
+test_dyadic_finite_precision_and_baselines (test_paper_numbers.PaperNumbers) ... ok
+test_table1_nudging_scan (test_paper_numbers.PaperNumbers) ... ok
+test_table2_branch_certificates (test_paper_numbers.PaperNumbers) ... ok
+test_tube_certificate_and_rejection (test_paper_numbers.PaperNumbers) ... ok
+test_integrator_table (test_paper_numbers.PaperNumbersFromOtherFiles) ... ok
+test_non_normal_table (test_paper_numbers.PaperNumbersFromOtherFiles) ... ok
+test_stage1_and_tradeoff (test_paper_numbers.PaperNumbersFromOtherFiles) ... ok
 test_controller_finds_common_beta_with_certified_gradient_error (test_stage5.CertifiedMultiBranchGEPTests) ... ok
 test_endpoint_boxes_certify_finite_difference_and_enclose_candidate (test_stage5.CertifiedMultiBranchGEPTests) ... ok
 test_exact_implicit_gradient_values (test_stage5.CertifiedMultiBranchGEPTests) ... ok
@@ -16,6 +25,6 @@ test_out_of_domain_requests_fail_closed (test_stage5.CertifiedMultiBranchGEPTest
 test_parameter_tubes_prove_unique_branch_and_stability (test_stage5.CertifiedMultiBranchGEPTests) ... ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 0.023s
+Ran 17 tests in 0.028s
 
 OK

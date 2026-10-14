@@ -1,0 +1,111 @@
+{
+  "certificate_scope": "finite-precision stationary linear solve; exact branch midpoint (1,0); no ODE trajectory, midpoint uncertainty, or model uncertainty included",
+  "arithmetic": "each float64 output converted to its exact binary rational, then residual and norm bound computed exactly with Fraction",
+  "A_exact": [
+    [
+      "-2",
+      "1/5"
+    ],
+    [
+      "-1/5",
+      "-1"
+    ]
+  ],
+  "q_exact": [
+    "7/10",
+    "1/5"
+  ],
+  "true_adjoint_state_exact": [
+    "-11/34",
+    "-9/34"
+  ],
+  "true_gradient_exact": "-11/34",
+  "inverse_transpose_inf_norm_exact": "55/51",
+  "rows": [
+    {
+      "beta_float": 0.1,
+      "d_float": [
+        -0.032352941176470584,
+        -0.02647058823529412
+      ],
+      "residual_exact": [
+        "-1/90071992547409920",
+        "1/360287970189639680"
+      ],
+      "residual_inf_exact": "1/90071992547409920",
+      "residual_inf_decimal": 1.1102230246251566e-17,
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "gradient_estimate_exact": "-1165637550613540/3602879701896397",
+      "true_gradient_exact": "-11/34",
+      "actual_gradient_error_exact": "7/122497909864477498",
+      "actual_gradient_error_decimal": 5.714383214982423e-17,
+      "certified_error_upper_exact": "22/183746864796716247",
+      "certified_error_upper_decimal": 1.1972993402820315e-16,
+      "certificate_passed": true
+    },
+    {
+      "beta_float": 0.01,
+      "d_float": [
+        -0.0032352941176470584,
+        -0.0026470588235294116
+      ],
+      "residual_exact": [
+        "-11/11529215046068469760",
+        "-1/11529215046068469760"
+      ],
+      "residual_inf_exact": "11/11529215046068469760",
+      "residual_inf_decimal": 9.54097911787244e-19,
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "gradient_estimate_exact": "-1865020080981664/5764607523034235",
+      "true_gradient_exact": "-11/34",
+      "actual_gradient_error_exact": "9/195996655783163990",
+      "actual_gradient_error_decimal": 4.5919150834680185e-17,
+      "certified_error_upper_exact": "121/1175979934698983940",
+      "certified_error_upper_decimal": 1.0289291205548709e-16,
+      "certificate_passed": true
+    },
+    {
+      "beta_float": 0.001,
+      "d_float": [
+        -0.00032352941176470585,
+        -0.0002647058823529412
+      ],
+      "residual_exact": [
+        "-3/46116860184273879040",
+        "3/92233720368547758080"
+      ],
+      "residual_inf_exact": "3/46116860184273879040",
+      "residual_inf_decimal": 6.505213034913026e-20,
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "gradient_estimate_exact": "-5968064259141325/18446744073709552",
+      "true_gradient_exact": "-11/34",
+      "actual_gradient_error_exact": "11/313594649253062384",
+      "actual_gradient_error_decimal": 3.507712910982514e-17,
+      "certified_error_upper_exact": "11/156797324626531192",
+      "certified_error_upper_decimal": 7.015425821965028e-17,
+      "certificate_passed": true
+    },
+    {
+      "beta_float": 0.0001,
+      "d_float": [
+        -3.2352941176470585e-05,
+        -2.647058823529412e-05
+      ],
+      "residual_exact": [
+        "-13/1475739525896764129280",
+        "1/1475739525896764129280"
+      ],
+      "residual_inf_exact": "13/1475739525896764129280",
+      "residual_inf_decimal": 8.809142651444724e-21,
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "gradient_estimate_exact": "-2387225703656530/7378697629483821",
+      "true_gradient_exact": "-11/34",
+      "actual_gradient_error_exact": "11/250875719402449914",
+      "actual_gradient_error_decimal": 4.3846411387281426e-17,
+      "certified_error_upper_exact": "143/1505254316414699484",
+      "certified_error_upper_decimal": 9.500055800577642e-17,
+      "certificate_passed": true
+    }
+  ],
+  "all_certificates_pass": true
+}

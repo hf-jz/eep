@@ -1,0 +1,90 @@
+{
+  "branch": [
+    1.0,
+    0.0
+  ],
+  "A": [
+    [
+      -2.0,
+      0.2
+    ],
+    [
+      -0.2,
+      -1.0
+    ]
+  ],
+  "B": [
+    [
+      1.0
+    ],
+    [
+      0.0
+    ]
+  ],
+  "q": [
+    0.7,
+    0.2
+  ],
+  "implicit_gradient_exact": -0.32352941176470584,
+  "standard_vf_ep_infinitesimal": -0.3627450980392157,
+  "standard_vf_abs_bias": 0.03921568627450983,
+  "asymep_finite_beta": [
+    {
+      "beta": 0.08,
+      "asymep_estimate": -0.3233320447166919,
+      "asymep_abs_error": 0.00019736704801393,
+      "root_residual_plus": 4.1957363356048215e-17,
+      "root_residual_minus": 9.08041165058493e-17
+    },
+    {
+      "beta": 0.04,
+      "asymep_estimate": -0.3234802006079007,
+      "asymep_abs_error": 4.9211156805117895e-05,
+      "root_residual_plus": 3.065359953208275e-17,
+      "root_residual_minus": 1.1443916996305594e-16
+    },
+    {
+      "beta": 0.02,
+      "asymep_estimate": -0.32351711709603936,
+      "asymep_abs_error": 1.2294668666479325e-05,
+      "root_residual_plus": 6.266651041207814e-17,
+      "root_residual_minus": 1.1858455995434198e-16
+    },
+    {
+      "beta": 0.01,
+      "asymep_estimate": -0.32352633860441293,
+      "asymep_abs_error": 3.07316029291016e-06,
+      "root_residual_plus": 2.3562883774707687e-17,
+      "root_residual_minus": 1.7433755170605403e-16
+    },
+    {
+      "beta": 0.005,
+      "asymep_estimate": -0.32352864350632116,
+      "asymep_abs_error": 7.682583846868596e-07,
+      "root_residual_plus": 1.0842108460681901e-16,
+      "root_residual_minus": 1.6540931736891719e-16
+    }
+  ],
+  "dyadic_ideal_finite_beta": [
+    {
+      "beta": 0.1,
+      "ideal_signal": -0.32352941176470584,
+      "abs_error": 0.0
+    },
+    {
+      "beta": 0.01,
+      "ideal_signal": -0.32352941176470584,
+      "abs_error": 0.0
+    },
+    {
+      "beta": 0.001,
+      "ideal_signal": -0.32352941176470584,
+      "abs_error": 0.0
+    },
+    {
+      "beta": 0.0001,
+      "ideal_signal": -0.32352941176470584,
+      "abs_error": 0.0
+    }
+  ]
+}

@@ -791,8 +791,9 @@ tolerance $\varepsilon = 10^{-5}$. Table~\ref{tab:scan} gives the outcome for a 
 \small
 \caption{Certified worst-branch gradient error bound against the nudging strength on the
 benchmark \eqref{eq:model}, tolerance $\varepsilon = 10^{-5}$. Every row is the maximum over the
-two stable branches of the interval error \eqref{eq:errdef}. The bound scales as $\beta^2$: the
-ratios for successive halvings are $4.0008$, $4.0011$, $4.0007$. Acceptance stops between
+two stable branches of the interval error \eqref{eq:errdef}. The bias scales as $\beta^2$, and adding the
+$1/\beta$ enclosure term gives ratios for successive halvings from $0.02$ of $4.0009$, $3.9912$ and
+$3.9271$, bending below $4$ as the enclosure term becomes comparable to the bias. Acceptance stops between
 $0.0075$ and $0.005$.}
 \label{tab:scan}
 \begin{tabular}{rrrl}

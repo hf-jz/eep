@@ -1,0 +1,71 @@
+{
+  "scope": "residual-only; midpoint is exact; no ODE integration error included",
+  "A": [
+    [
+      "-2",
+      "1/5"
+    ],
+    [
+      "-1/5",
+      "-1"
+    ]
+  ],
+  "q": [
+    "7/10",
+    "1/5"
+  ],
+  "A_transpose_inverse": [
+    [
+      "-25/51",
+      "5/51"
+    ],
+    [
+      "-5/51",
+      "-50/51"
+    ]
+  ],
+  "true_state_adjoint": [
+    "-11/34",
+    "-9/34"
+  ],
+  "true_gradient": "-11/34",
+  "inverse_transpose_inf_norm": "55/51",
+  "rows": [
+    {
+      "beta": "1/10",
+      "beta_decimal": 0.1,
+      "residual_inf_bound": "1/10000000000",
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "certified_gradient_error_bound_exact": "11/10200000000",
+      "certified_gradient_error_bound_decimal": 1.0784313725490196e-09,
+      "true_gradient_exact": "-11/34"
+    },
+    {
+      "beta": "1/100",
+      "beta_decimal": 0.01,
+      "residual_inf_bound": "1/10000000000",
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "certified_gradient_error_bound_exact": "11/1020000000",
+      "certified_gradient_error_bound_decimal": 1.0784313725490196e-08,
+      "true_gradient_exact": "-11/34"
+    },
+    {
+      "beta": "1/1000",
+      "beta_decimal": 0.001,
+      "residual_inf_bound": "1/10000000000",
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "certified_gradient_error_bound_exact": "11/102000000",
+      "certified_gradient_error_bound_decimal": 1.0784313725490195e-07,
+      "true_gradient_exact": "-11/34"
+    },
+    {
+      "beta": "1/10000",
+      "beta_decimal": 0.0001,
+      "residual_inf_bound": "1/10000000000",
+      "inverse_transpose_inf_norm_exact": "55/51",
+      "certified_gradient_error_bound_exact": "11/10200000",
+      "certified_gradient_error_bound_decimal": 1.0784313725490197e-06,
+      "true_gradient_exact": "-11/34"
+    }
+  ]
+}
